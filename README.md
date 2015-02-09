@@ -1,2 +1,2 @@
 # learn-python
-Various practice problems on the journey to learn Python.
+Various practice problems to help learn Python.
