@@ -42,7 +42,7 @@ def find_best_jobs(job_list):
         return [0,[]]
     # choose first job
     first_job = job_list[0]
-    a = find_best_jobs(jobs_after(first_job[0], job_list))
+    a = find_best_jobs(jobs_after(first_job[1], job_list))
     best_cost = a[0] + first_job[2]
     best_jobs = [first_job]
     for job in a[1]:
