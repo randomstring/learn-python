@@ -22,4 +22,36 @@ def cost(job_list):
     output: total cost of the jobs, (return zero if there is overlap?)
     """
     cost = 0
+    for job in job_list:
+        cost += job[2]
     return cost
+
+def jobs_after(time,job_list):
+    """
+    input: a time and a job list
+    output: return all the jobs that start after the given time
+    """
+    return [job for job in job_list if (job[0] > time) ]
+
+def find_best_jobs(job_list):
+    """
+    input: job list, sorted by start time 
+    output: return tuple with best cost and the list of non-overlapping jobs
+    """
+    if (len(job_list) < 1):
+        return [0,[]]
+    # choose first job
+    first_job = job_list[0]
+    a = find_best_jobs(jobs_after(first_job[0], job_list))
+    best_cost = a[0] + first_job[2]
+    best_jobs = [first_job]
+    for job in a[1]:
+        best_jobs.append(job)
+    b = find_best_jobs(job_list[1:])
+    if (b[0] > best_cost):
+        best_cost = b[0]
+        best_jobs = b[1]
+    print("best:", best_cost, best_jobs)
+    return [best_cost, best_jobs ]
+
+print("best jobs:", find_best_jobs(job_list))
