@@ -11,7 +11,7 @@ def gen_random_jobs(jobs, time_range, cost_range):
     """
     return [ [s, s+d if s+d <= time_range else time_range + 1 , c  ] for s,d,c in [ ( randint(0,time_range), randint(1,time_range), randint(1,cost_range) ) for i in range(jobs) ]]
 
-job_list = gen_random_jobs(5, 20, 100)
+job_list = gen_random_jobs(10, 40, 100)
 print("unsorted:", job_list)
 job_list.sort(key= lambda x:x[0])
 print("sorted:", job_list)
@@ -42,16 +42,15 @@ def find_best_jobs(job_list):
         return [0,[]]
     # choose first job
     first_job = job_list[0]
-    a = find_best_jobs(jobs_after(first_job[1], job_list))
-    best_cost = a[0] + first_job[2]
-    best_jobs = [first_job]
-    for job in a[1]:
-        best_jobs.append(job)
-    b = find_best_jobs(job_list[1:])
-    if (b[0] > best_cost):
-        best_cost = b[0]
-        best_jobs = b[1]
-    print("best:", best_cost, best_jobs)
-    return [best_cost, best_jobs ]
+    [a_cost, a_jobs] = find_best_jobs(jobs_after(first_job[1], job_list))
+    a_cost += first_job[2]
+    a_jobs.insert(0, first_job)
+    [b_cost, b_jobs] = find_best_jobs(job_list[1:])
+    if (b_cost > a_cost):
+        #print("best (skip first):", b_cost, b_jobs)
+        return [ b_cost, b_jobs ]
+    #print("best (with first):", a_cost, a_jobs)
+    #print("   first:", first_job)
+    return [a_cost, a_jobs ]
 
 print("best jobs:", find_best_jobs(job_list))
