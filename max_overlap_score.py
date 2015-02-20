@@ -1,6 +1,9 @@
 #!/usr/bin/python3
+# Dynamic programming problem.
+#
 # 5) Given a set of n jobs with [start time, end time, cost] find a
-# subset so that no 2 jobs overlap and the cost is maximum ?
+# subset so that no 2 jobs overlap and the cost is maximized.
+#
 
 from random import randint
 
@@ -12,6 +15,10 @@ def gen_random_jobs(jobs, time_range, cost_range):
     return [ [s, s+d if s+d <= time_range else time_range + 1 , c  ] for s,d,c in [ ( randint(0,time_range), randint(1,time_range), randint(1,cost_range) ) for i in range(jobs) ]]
 
 job_list = gen_random_jobs(10, 40, 100)
+
+#
+# Sorting should not effect the result, TODO: demonstrate this
+#
 print("unsorted:", job_list)
 job_list.sort(key= lambda x:x[0])
 print("sorted:", job_list)
