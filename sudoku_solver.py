@@ -4,6 +4,8 @@
 #
 
 size = 9
+filled = 0
+solved = False
 
 def print_board(board):
     for (i,row) in enumerate(board):
@@ -17,11 +19,32 @@ def print_board(board):
 
 def empty_board(size): return [ [ 0 for i in range(size)] for i in range(size)]
 
-def populate_board(board, entries):
-    # entry is a list [ x, y, value ]
-    for entry in entries:
-        [x, y, val] = entry
+def make_moves(board, moves):
+    # make a list of moves
+    # moves is a list [ x, y, value ]
+    for move in moves:
+        [x, y, val] = move
+        if board[x][y] == 0:
+            filled = filled + 1
+        else:
+            print("making a move on a coordinate that is already filled in:" x, y, val)
         board[x][y] = val
+    if filled == 81:
+        solved = True
+
+def backtrack(board, moves):
+    # undo a list of moves
+    # moves is a list [ x, y, value ]
+    for move in moves:
+        [x, y] = move
+        if board[x][y] != 0:
+            filled = filled - 1
+        else:
+            print("backtracking on an empty coordinate:", x, y)
+        board[x][y] = 0
+    if filled < 0:
+        print("oh no, we have negative moves")
+
 
 board = empty_board(9)
 
