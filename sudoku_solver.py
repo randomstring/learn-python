@@ -60,6 +60,7 @@ def possible_values(board,row,col):
     used = set()
     used = used | set([board[row][i] for i in range(9) if board[row][i] != 0])
     used = used | set([board[i][col] for i in range(9) if board[i][col] != 0])
+    # need to take quadrants into account
     values = set( i for i in range(9) if i not in used )
     return values
 
