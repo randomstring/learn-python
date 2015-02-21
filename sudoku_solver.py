@@ -51,7 +51,16 @@ def most_constrained(board):
             if (board[row][col] != 0):
                 constrained[row][col] = 0
             else:
-                constrained[row][col] = 9 - len(set([board[row][i] for i in range(9) if board[row][i] != 0]))
+                constrained[row][col] = len(possible_values(board,row,col))
     return constrained
+
+def possible_values(board,row,col):
+    if (board[row][col] != 0):
+        return set(board[row][col])
+    used = set()
+    used = used | set([board[row][i] for i in range(9) if board[row][i] != 0])
+    used = used | set([board[i][col] for i in range(9) if board[i][col] != 0])
+    values = set( i for i in range(9) if i not in used )
+    return values
 
 print_board(most_constrained(board))
