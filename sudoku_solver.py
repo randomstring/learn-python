@@ -3,9 +3,12 @@
 # Sudoku Solver
 #
 
-size = 9
-filled = 0
-solved = False
+def print_game(game):
+    print_board(game["board"])
+    if (game["solved"] == True):
+        print("Solved!")
+    else:
+        print("filled in so far:", game["filled"])
 
 def print_board(board):
     for (i,row) in enumerate(board):
@@ -19,41 +22,41 @@ def print_board(board):
 
 def empty_board(size): return [ [ 0 for i in range(size)] for i in range(size)]
 
-def make_moves(board, moves):
+def make_moves(game, moves):
     # make a list of moves
     # moves is a list [ x, y, value ]
     for move in moves:
         [x, y, val] = move
-        if board[x][y] == 0:
-            filled = filled + 1
+        if game["board"][x][y] == 0:
+            game["filled"] = game["filled"] + 1
         else:
-            print("making a move on a coordinate that is already filled in:" x, y, val)
-        board[x][y] = val
-    if filled == 81:
-        solved = True
+            print("making a move on a coordinate that is already filled in:", x, y, val)
+        game["board"][x][y] = val
+    if game["filled"] == 81:
+        game["solved"] = True
 
-def backtrack(board, moves):
+def backtrack(game, moves):
     # undo a list of moves
     # moves is a list [ x, y, value ]
     for move in moves:
         [x, y] = move
-        if board[x][y] != 0:
-            filled = filled - 1
+        if game["board"][x][y] != 0:
+            game["filled"] = game["filled"] - 1
         else:
             print("backtracking on an empty coordinate:", x, y)
-        board[x][y] = 0
-    if filled < 0:
+        game["board"][x][y] = 0
+    if game["filled"] < 0:
         print("oh no, we have negative moves")
 
 
-board = empty_board(9)
+game = {"filled": 0, "board": empty_board(9), "solved": False }
 
 # From The Algorithm Design Manual 2nd Edition (S. S. Skiena) Page 239
 # this is a "hard" problem
-populate_board(board,[[0,7,1],[0,8,2],[1,4,3],[1,5,5],[2,3,6],[2,7,7],[3,0,7],[3,6,3],[4,3,4],[4,6,8],[5,0,1],[6,3,1],[6,4,2],[7,1,8],[7,7,4],[8,1,5],[8,6,6]])
+make_moves(game,[[0,7,1],[0,8,2],[1,4,3],[1,5,5],[2,3,6],[2,7,7],[3,0,7],[3,6,3],[4,3,4],[4,6,8],[5,0,1],[6,3,1],[6,4,2],[7,1,8],[7,7,4],[8,1,5],[8,6,6]])
 
-# hint
-populate_board(board,[[0,0,6],[0,1,7],[0,2,3],[1,0,9],[2,0,8]])
+# hints (to make it easier for testing)
+make_moves(game,[[0,0,6],[0,1,7],[0,2,3],[1,0,9],[2,0,8]])
 
 solution = ["6 7 3 8 9 4 5 1 2", 
             "9 1 2 7 3 5 4 8 6",
@@ -65,7 +68,7 @@ solution = ["6 7 3 8 9 4 5 1 2",
             "2 8 7 3 5 6 1 4 9",
             "3 5 1 9 4 7 6 2 8"]
 
-print_board(board)
+print_game(game)
 
 def most_constrained(board):
     constrained= empty_board(9)
@@ -99,7 +102,7 @@ def quadrant_coordinates(row,col):
     return [ [r + 3 * int(row / 3), c + 3 * int(col / 3)] for r in range(3) for c in range(3)]
 
 print("---- constrained: ----")
-print_board(most_constrained(board))
+print_board(most_constrained(game["board"]))
 
 #print("---- sample of possible values: ----")
 #for row in range(2):
