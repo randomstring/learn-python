@@ -43,3 +43,15 @@ solution = ["6 7 3 8 9 4 5 1 2",
             "3 5 1 9 4 7 6 2 8"]
 
 print_board(board)
+
+def most_constrained(board):
+    constrained= empty_board(9)
+    for row in range(9):
+        for col in range(9):
+            if (board[row][col] != 0):
+                constrained[row][col] = 0
+            else:
+                constrained[row][col] = 9 - len(set([board[row][i] for i in range(9) if board[row][i] != 0]))
+    return constrained
+
+print_board(most_constrained(board))
