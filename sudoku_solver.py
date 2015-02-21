@@ -6,7 +6,7 @@
 def print_game(game):
     print_board(game["board"])
     if (game["solved"] == True):
-        print("Solved! in", game["moves"], "tries")
+        print("Solved! in", game["tries"], "tries")
     else:
         print("filled in so far:", game["filled"])
 
@@ -49,27 +49,6 @@ def backtrack(game, moves):
         print("oh no, we have negative moves")
 
 
-game = {"filled": 0, "board": empty_board(9), "solved": False, "moves": 0 }
-
-# From The Algorithm Design Manual 2nd Edition (S. S. Skiena) Page 239
-# this is a "hard" problem
-make_moves(game,[[0,7,1],[0,8,2],[1,4,3],[1,5,5],[2,3,6],[2,7,7],[3,0,7],[3,6,3],[4,3,4],[4,6,8],[5,0,1],[6,3,1],[6,4,2],[7,1,8],[7,7,4],[8,1,5],[8,6,6]])
-
-# hints (to make it easier for testing)
-make_moves(game,[[0,0,6],[0,1,7],[0,2,3],[1,0,9],[2,0,8]])
-
-solution = ["6 7 3 8 9 4 5 1 2", 
-            "9 1 2 7 3 5 4 8 6",
-            "8 4 5 6 1 2 9 7 3",
-            "7 9 8 2 6 1 3 5 4",
-            "5 2 6 4 7 3 8 9 1",
-            "1 3 4 5 8 9 2 6 7",
-            "4 6 9 1 2 8 7 3 5",
-            "2 8 7 3 5 6 1 4 9",
-            "3 5 1 9 4 7 6 2 8"]
-
-print_game(game)
-
 def most_constrained(board):
     constrained= empty_board(9)
     for row in range(9):
@@ -97,20 +76,10 @@ def quadrant_coordinates(row,col):
     # output: list of [row, col] in the quadrant
     return [ [r + 3 * int(row / 3), c + 3 * int(col / 3)] for r in range(3) for c in range(3)]
 
-#print("---- constrained: ----")
-#print_board(most_constrained(game["board"]))
-
-#print("---- sample of possible values: ----")
-#for row in range(2):
-#    for col in range(9):
-#        print(row, col, "possible:", possible_values(board,row,col))
-
 def most_constrained_move(game):
     # for a given game state return [row, col, (set of possible
     # values)] for the most constrained possition of the game
     constrained = most_constrained(game["board"])
-    #print("---- constrained: ----")
-    #print_board(constrained)
     min = 10
     coords = [9,9]
     for row in range(9):
@@ -124,20 +93,52 @@ def most_constrained_move(game):
     return [ coords, possible_values(game["board"], coords[0], coords[1])]
 
 def solve_sudoku(game):
+    # 1. pick most constrained coordinate and try all legal values
+    # 2. recersively solve the rest of the puzzle
     if game["solved"] == True:
         return
     [coords, possible_values] = most_constrained_move(game)
     # print("next move is coords:", coords, "possible values:", possible_values)
     for val in list(possible_values):
         make_moves(game,[[coords[0], coords[1], val]])
-        game["moves"] += 1
+        game["tries"] += 1
         # print_game(game)
         solve_sudoku(game)
         if (game["solved"] == True):
             break
         backtrack(game,[[coords[0], coords[1]]])
 
+
+#
+# Set up Game board
+#
+game = {"filled": 0, "board": empty_board(9), "solved": False, "tries": 0 }
+
+# From The Algorithm Design Manual 2nd Edition (S. S. Skiena) Page 239
+# this is a "hard" problem
+make_moves(game,[[0,7,1],[0,8,2],[1,4,3],[1,5,5],[2,3,6],[2,7,7],[3,0,7],[3,6,3],[4,3,4],[4,6,8],[5,0,1],[6,3,1],[6,4,2],[7,1,8],[7,7,4],[8,1,5],[8,6,6]])
+
+# Some Hints (to make it faster for testing)
+make_moves(game,[[0,0,6],[0,1,7],[0,2,3],[1,0,9],[2,0,8]])   # about 0.11 s
+# make_moves(game,[[0,0,6],[0,1,7]])                           # about 0.25 s
+# make_moves(game,[[0,0,6]])                                   # about 10 s
+# with no hints it takes about 20 s
+
+# solution for reference
+solution = ["6 7 3 8 9 4 5 1 2", 
+            "9 1 2 7 3 5 4 8 6",
+            "8 4 5 6 1 2 9 7 3",
+            "7 9 8 2 6 1 3 5 4",
+            "5 2 6 4 7 3 8 9 1",
+            "1 3 4 5 8 9 2 6 7",
+            "4 6 9 1 2 8 7 3 5",
+            "2 8 7 3 5 6 1 4 9",
+            "3 5 1 9 4 7 6 2 8"]
+
+print("--- starting possition ---")
+print_game(game)
 solve_sudoku(game)
+print("--- final possition ---")
 print_game(game)
 
 
