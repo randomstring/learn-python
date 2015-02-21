@@ -81,6 +81,8 @@ def most_constrained(board):
     return constrained
 
 def possible_values(board,row,col):
+    if row >= 9 or col >= 9:
+        return set()
     if (board[row][col] != 0):
         return set([board[row][col]])
     used_row = set([board[row][i] for i in range(9) if board[row][i] != 0])
@@ -125,6 +127,23 @@ def most_constrained_move(game):
     print("most constrained coords:", coords, " possible values:", possible_values(game["board"], coords[0], coords[1]))
     return [ coords, possible_values(game["board"], coords[0], coords[1])]
 
-most_constrained_move(game)
+# most_constrained_move(game)
+
+def solve_sudoku(game):
+    if game["solved"] == True:
+        return
+    [coords, possible_values] = most_constrained_move(game)
+    print("next move")
+    print("coords:", coords)
+    print("possible values:", possible_values)
+    for val in list(possible_values):
+        make_moves(game,[[coords[0], coords[1], val]])
+        print_game(game)
+        solve_sudoku(game)
+        if (game["solved"] == True):
+            break
+        backtrack(game,[[coords[0], coords[1]]])
+
+solve_sudoku(game)
 
 
