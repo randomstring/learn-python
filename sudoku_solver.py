@@ -57,11 +57,31 @@ def most_constrained(board):
 def possible_values(board,row,col):
     if (board[row][col] != 0):
         return set([board[row][col]])
-    used = set()
-    used = used | set([board[row][i] for i in range(9) if board[row][i] != 0])
-    used = used | set([board[i][col] for i in range(9) if board[i][col] != 0])
-    # need to take quadrants into account
-    values = set( i for i in range(9) if i not in used )
+    used_row = set([board[row][i] for i in range(9) if board[row][i] != 0])
+    used_col = set([board[i][col] for i in range(9) if board[i][col] != 0])
+    used_quad = set([board[r][c] for r,c in quadrant_coordinates(row,col) if board[r][c] != 0])
+    #print("row:", row, "col:", col)
+    #print("used_row:", used_row)
+    #print("used_col:", used_col)
+    #print("used_quad:", used_quad)
+    used = used_row | used_col  | used_quad
+    #print("used:", used)
+    values = set( i for i in range(1,10) if i not in used )
+    #print("possible values:", values)
     return values
 
+def quadrant_coordinates(row,col):
+    # input: row, col
+    # output: list of [row, col] in the quadrant
+    return [ [r + 3 * int(row / 3), c + 3 * int(col / 3)] for r in range(3) for c in range(3)]
+
+print("---- constrained: ----")
 print_board(most_constrained(board))
+
+#print("---- sample of possible values: ----")
+#for row in range(2):
+#    for col in range(9):
+#        print(row, col, "possible:", possible_values(board,row,col))
+
+
+
