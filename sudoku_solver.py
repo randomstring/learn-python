@@ -56,7 +56,7 @@ def most_constrained(board):
 
 def possible_values(board,row,col):
     if (board[row][col] != 0):
-        return set(board[row][col])
+        return set([board[row][col]])
     used = set()
     used = used | set([board[row][i] for i in range(9) if board[row][i] != 0])
     used = used | set([board[i][col] for i in range(9) if board[i][col] != 0])
