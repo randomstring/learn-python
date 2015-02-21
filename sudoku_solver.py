@@ -101,13 +101,30 @@ def quadrant_coordinates(row,col):
     # output: list of [row, col] in the quadrant
     return [ [r + 3 * int(row / 3), c + 3 * int(col / 3)] for r in range(3) for c in range(3)]
 
-print("---- constrained: ----")
-print_board(most_constrained(game["board"]))
+#print("---- constrained: ----")
+#print_board(most_constrained(game["board"]))
 
 #print("---- sample of possible values: ----")
 #for row in range(2):
 #    for col in range(9):
 #        print(row, col, "possible:", possible_values(board,row,col))
 
+def most_constrained_move(game):
+    # for a given game state return [row, col, (set of possible
+    # values)] for the most constrained possition of the game
+    constrained = most_constrained(game["board"])
+    print("---- constrained: ----")
+    print_board(constrained)
+    min = 10
+    coords = [9,9]
+    for row in range(9):
+        for col in range(9):
+            if constrained[row][col] != 0 and constrained[row][col] < min:
+                min = constrained[row][col]
+                coords = [row, col]
+    print("most constrained coords:", coords, " possible values:", possible_values(game["board"], coords[0], coords[1]))
+    return [ coords, possible_values(game["board"], coords[0], coords[1])]
+
+most_constrained_move(game)
 
 
