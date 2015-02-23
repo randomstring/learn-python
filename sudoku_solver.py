@@ -110,10 +110,17 @@ def solve_sudoku(game):
 
 def move_list_from_strings(lines):
     moves = []
-    for row,line in enumerate(lines):
-        for col, val in enumerate(line.split()):
-            if val != '.':
-                moves.append([row,col,int(val)])
+    if len(lines) == 1:
+        # format: one list of elements "...2...5...1" or "10004000700" etc.
+        for i,val in enumerate(line):
+            if val != '.' and val != '0':
+                moves.append([int(i/9),i % 9,int(val)])
+    else:
+        # format: list of rows
+        for row,line in enumerate(lines):
+            for col, val in enumerate(line.split()):
+                if val != '.' and val != '0':
+                    moves.append([row,col,int(val)])
     return moves
 
 #
@@ -173,4 +180,5 @@ solve_sudoku(game)
 print("--- final possition ---")
 print_game(game)
 
-
+# TODO:
+# read in new puzzles in single sting and test on exampes from http://norvig.com/sudoku.html
