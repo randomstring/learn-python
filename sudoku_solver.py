@@ -112,9 +112,9 @@ def move_list_from_strings(lines):
     moves = []
     if len(lines) == 1:
         # format: one list of elements "...2...5...1" or "10004000700" etc.
-        for i,val in enumerate(line):
+        for i,val in enumerate(lines[0]):
             if val != '.' and val != '0':
-                moves.append([int(i/9),i % 9,int(val)])
+                moves.append([int(i / 9), i % 9, int(val)])
     else:
         # format: list of rows
         for row,line in enumerate(lines):
@@ -128,8 +128,8 @@ def move_list_from_strings(lines):
 #
 game = {"filled": 0, "board": empty_board(9), "solved": False, "tries": 0 }
 
-# choose problem 1-4
-game_number = 4
+# choose problem 1-5
+game_number = 5
 
 if game_number == 1:
     # From The Algorithm Design Manual 2nd Edition (S. S. Skiena) Page 239
@@ -158,7 +158,7 @@ elif game_number == 2:
 elif game_number == 3:
     # medium problem from American Airlines inflight Magazine
     make_moves(game,[[0,2,5],[0,3,3],[0,6,1],[0,8,4],[1,0,9],[1,1,3],[1,3,5],[1,6,2],[2,5,6],[2,7,5],[3,1,5],[3,4,2],[3,5,8],[3,8,1],[4,1,9],[4,2,4],[4,6,8],[4,7,2],[5,0,8],[5,3,6],[5,4,1],[5,7,7],[6,1,6],[6,3,1],[7,2,2],[7,5,5],[7,7,1],[7,8,8],[8,0,5],[8,2,9],[8,5,2],[8,6,6]])
-else:
+elif game_number == 4:
     # hard problem from American Airlines inflight Magazine
     problem4 = ["3 7 . 4 . . 1 . .",
                 ". . . . . . . 2 .",
@@ -170,6 +170,12 @@ else:
                 ". 1 . . . . . . .",
                 ". . 8 . . 2 . 9 1"]
     make_moves(game,move_list_from_strings(problem4))
+elif game_number == 5:
+    # Norvig's hardest sudoku problem http://norvig.com/sudoku.html  (takes 0.09 s)
+    make_moves(game,move_list_from_strings(['.....6....59.....82....8....45........3........6..3.54...325..6..................']))
+else:
+    print("I don't have a problem for that!")
+
 
 #
 # Solve the puzzle
