@@ -2,11 +2,13 @@
 #
 # Sudoku Solver
 #
+import time
 
 def print_game(game):
     print_board(game["board"])
     if (game["solved"] == True):
-        print("Solved! in", game["tries"], "tries")
+        elapsed = game["end_time"] - game["start_time"]
+        print("Solved! in", game["tries"], "tries and", elapsed, "seconds")
     else:
         print("filled in so far:", game["filled"])
 
@@ -48,7 +50,9 @@ def backtrack(game, moves):
     if game["filled"] < 0:
         print("oh no, we have negative moves")
 
-
+# Create a board (matrix) with a count of how many possible values can
+# legally satisfy that square. We use this to pick which square to
+# fill in next.
 def most_constrained(board):
     constrained= empty_board(9)
     for row in range(9):
@@ -59,6 +63,9 @@ def most_constrained(board):
                 constrained[row][col] = len(possible_values(board,row,col))
     return constrained
 
+# Given a game board and a row, col determine all the legal values
+# that can fill in that square. Used to create a list of values to try
+# for that square.
 def possible_values(board,row,col):
     if row >= 9 or col >= 9:
         return set()
@@ -71,6 +78,8 @@ def possible_values(board,row,col):
     values = set( i for i in range(1,10) if i not in used )
     return values
 
+# return the list of coordinates for the quadrant that the given row,
+# col square is located.
 def quadrant_coordinates(row,col):
     # input: row, col
     # output: list of [row, col] in the quadrant
@@ -95,19 +104,24 @@ def most_constrained_move(game):
 def solve_sudoku(game):
     # 1. pick most constrained coordinate and try all legal values
     # 2. recersively solve the rest of the puzzle
+    if "start_time" not in game:
+        game["start_time"] = time.time()
     if game["solved"] == True:
         return
     [coords, possible_values] = most_constrained_move(game)
-    # print("next move is coords:", coords, "possible values:", possible_values)
     for val in list(possible_values):
         make_moves(game,[[coords[0], coords[1], val]])
         game["tries"] += 1
-        # print_game(game)
         solve_sudoku(game)
         if (game["solved"] == True):
             break
         backtrack(game,[[coords[0], coords[1]]])
+    if game["solved"] == True and "end_time" not in game:
+        game["end_time"] = time.time()
 
+
+# Generate a list of moves given either 1) an array of row strings or
+# 2) one long string with all the filled in squares
 def move_list_from_strings(lines):
     moves = []
     if len(lines) == 1:
@@ -137,7 +151,7 @@ if game_number == 1:
     make_moves(game,[[0,7,1],[0,8,2],[1,4,3],[1,5,5],[2,3,6],[2,7,7],[3,0,7],[3,6,3],[4,3,4],[4,6,8],[5,0,1],[6,3,1],[6,4,2],[7,1,8],[7,7,4],[8,1,5],[8,6,6]])
     
     # Some Hints (to make it faster for testing)
-    make_moves(game,[[0,0,6],[0,1,7],[0,2,3],[1,0,9],[2,0,8]])   # about 0.11 s
+    # make_moves(game,[[0,0,6],[0,1,7],[0,2,3],[1,0,9],[2,0,8]])   # about 0.11 s
     # make_moves(game,[[0,0,6],[0,1,7]])                           # about 0.25 s
     # make_moves(game,[[0,0,6]])                                   # about 10 s
     # with no hints it takes about 20 s
