@@ -1,3 +1,4 @@
+#!/Library/Frameworks/Python.framework/Versions/3.5/bin/python3
 #!/Users/dole/anaconda/bin/python3
 #
 # Connect Four
@@ -45,12 +46,46 @@ def random_move(board,player):
         return
     assert False, print('no more legal moves')
 
+def in_bounds(row,col):
+    """
+    >>> in_bounds(0,0)
+    True
+    >>> in_bounds(5,6)
+    True
+    >>> in_bounds(-1,0)
+    False
+    >>> in_bounds(6,6)
+    False
+    >>> in_bounds(5,7)
+    False
+    """
+    return row >= 0 and row < 6 and col >= 0 and col < 7
+
+possible_rows = [s for s in [[r+i for i in range(4)] for r in range(4)] if len(s) == 4]
+possible_cols = [s for s in [[r+i for i in range(4)] for r in range(3)] if len(s) == 4]
+
+# return all possible connect four coordinate sequences for a given coord
+def possible_connect_fours(row,col):
+    possibilities = []
+    # find possible rows an columns that contain the coordinate
+    # generate all possible connect fours
+    return possibilities
+
+# find_winner()
+#   - given a board, if a player has won, return the player id (1 or 2)
+#   - otherwise return 0
+def find_winner(board):
+    return 0
+
 # play
 board = empty_board()
 print_board(board)
 
 # play a random game
-while True:
+while False:
     random_move(board,1)
     random_move(board,2)
     print_board(board)
+
+print(possible_connect_fours(0,0))
+print(possible_connect_fours(0,3))
