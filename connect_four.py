@@ -61,25 +61,41 @@ def in_bounds(row,col):
     """
     return row >= 0 and row < 6 and col >= 0 and col < 7
 
-possible_rows = [s for s in [[r+i for i in range(4)] for r in range(4)] if len(s) == 4]
-possible_cols = [s for s in [[r+i for i in range(4)] for r in range(3)] if len(s) == 4]
-
-all_possible = [[[(r,c) for r in rows] for c in cols] for rows in possible_rows for cols in possible_cols]
-print(all_possible)
-
-# return all possible connect four coordinate sequences for a given coord
-def possible_connect_fours(row,col):
-    possibilities = []
-    # find possible rows an columns that contain the coordinate
-    # generate all possible connect fours
-    return possibilities
-
+#possible_rows = [s for s in [[r+i for i in range(4)] for r in range(4)] if len(s) == 4]
+#possible_cols = [s for s in [[r+i for i in range(4)] for r in range(3)] if len(s) == 4]
+#all_possible = [[[(r,c) for r in rows] for c in cols] for rows in possible_rows for cols in possible_cols]
+#print(all_possible)
 
 # find_winner()
 #   - given a board, if a player has won, return the player id (1 or 2)
 #   - otherwise return 0
 def find_winner(board):
+    player = 0
+    for r in range(6):
+        for c in range(7):
+            if board[r][c] != 0:
+                player = board[r][c]
+                # check for win in the col
+                count = 1
+                for ri in range(r+1,6):
+                    if board[ri][c] == player:
+                        count = count + 1
+                    else:
+                        break
+                if count >= 4:
+                    return player
+                # check for win in the row
+                count = 1
+                for ci in range(c+1,7):
+                    if board[r][ci] == player:
+                        count = count + 1
+                    else:
+                        break
+                if count >= 4:
+                    return player
     return 0
+
+
 
 # play
 board = empty_board()
@@ -91,5 +107,20 @@ while False:
     random_move(board,2)
     print_board(board)
 
-print(possible_connect_fours(0,0))
-print(possible_connect_fours(0,3))
+make_move(board,1,6)
+make_move(board,2,5)
+print_board(board)
+make_move(board,1,6)
+make_move(board,2,4)
+print_board(board)
+make_move(board,1,6)
+make_move(board,2,3)
+print_board(board)
+make_move(board,1,6)
+
+print_board(board)
+winner = find_winner(board)
+if winner != 0:
+    print("the winner is player {0}".format(winner))
+print_board(board)
+
