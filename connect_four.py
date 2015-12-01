@@ -64,12 +64,16 @@ def in_bounds(row,col):
 possible_rows = [s for s in [[r+i for i in range(4)] for r in range(4)] if len(s) == 4]
 possible_cols = [s for s in [[r+i for i in range(4)] for r in range(3)] if len(s) == 4]
 
+all_possible = [[[(r,c) for r in rows] for c in cols] for rows in possible_rows for cols in possible_cols]
+print(all_possible)
+
 # return all possible connect four coordinate sequences for a given coord
 def possible_connect_fours(row,col):
     possibilities = []
     # find possible rows an columns that contain the coordinate
     # generate all possible connect fours
     return possibilities
+
 
 # find_winner()
 #   - given a board, if a player has won, return the player id (1 or 2)
