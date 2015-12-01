@@ -93,6 +93,15 @@ def find_winner(board):
                         break
                 if count >= 4:
                     return player
+                # check diagonals
+                count = 1
+                for (ri,ci) in zip(range(r+1,6),range(c+1,7)):
+                    if board[r][ci] == player:
+                        count = count + 1
+                    else:
+                        break
+                if count >= 4:
+                    return player                                    
     return 0
 
 
@@ -102,25 +111,35 @@ board = empty_board()
 print_board(board)
 
 # play a random game
-while False:
+while True:
     random_move(board,1)
+    print_board(board)
+    winner = find_winner(board)
+    if winner != 0:
+        print("the winner is player {0}".format(winner))
+        break
     random_move(board,2)
     print_board(board)
+    winner = find_winner(board)
+    if winner != 0:
+        print("the winner is player {0}".format(winner))
+        break
 
-make_move(board,1,6)
-make_move(board,2,5)
-print_board(board)
-make_move(board,1,6)
-make_move(board,2,4)
-print_board(board)
-make_move(board,1,6)
-make_move(board,2,3)
-print_board(board)
-make_move(board,1,6)
+if False:
+    make_move(board,1,6)
+    make_move(board,2,5)
+    print_board(board)
+    make_move(board,1,6)
+    make_move(board,2,4)
+    print_board(board)
+    make_move(board,1,6)
+    make_move(board,2,3)
+    print_board(board)
+    make_move(board,1,6)
 
-print_board(board)
-winner = find_winner(board)
-if winner != 0:
-    print("the winner is player {0}".format(winner))
-print_board(board)
+    print_board(board)
+    winner = find_winner(board)
+    if winner != 0:
+        print("the winner is player {0}".format(winner))
+    print_board(board)
 
