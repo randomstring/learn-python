@@ -7,17 +7,13 @@ import random
 
 def empty_board(): return [ [ 0 for i in range(7)] for i in range(6)] 
 
+player_tokens = ['.', 'X', 'O']
+
 def print_board(board):
     for (i,row) in reversed(list(enumerate(board))):
         print("row", (i+1), ":",end="")
         for val in row:
-            if val == 0:
-                print(" . ",end="")
-            else:
-                piece = "O"
-                if val == 1:
-                    piece = "X"
-                print(" ",piece," ",end="",sep="")
+            print(" ",player_tokens[val]," ",end="",sep="")
         print("")
     print("----------------------------")
     print("column:",end="")
@@ -96,7 +92,15 @@ def find_winner(board):
                 # check diagonals
                 count = 1
                 for (ri,ci) in zip(range(r+1,6),range(c+1,7)):
-                    if board[r][ci] == player:
+                    if board[ri][ci] == player:
+                        count = count + 1
+                    else:
+                        break
+                if count >= 4:
+                    return player                                    
+                count = 1
+                for (ri,ci) in zip(range(r+1,6),reversed(range(0,c))):
+                    if board[ri][ci] == player:
                         count = count + 1
                     else:
                         break
@@ -111,35 +115,71 @@ board = empty_board()
 print_board(board)
 
 # play a random game
-while True:
+while False:
     random_move(board,1)
     print_board(board)
     winner = find_winner(board)
     if winner != 0:
-        print("the winner is player {0}".format(winner))
+        print("the winner is player {0}".format(player_tokens[winner]))
         break
     random_move(board,2)
     print_board(board)
     winner = find_winner(board)
     if winner != 0:
-        print("the winner is player {0}".format(winner))
+        print("the winner is player {0}".format(player_tokens[winner]))
         break
 
 if False:
+    board = empty_board()
+    print_board(board)
+    # Test column win
     make_move(board,1,6)
     make_move(board,2,5)
-    print_board(board)
     make_move(board,1,6)
     make_move(board,2,4)
-    print_board(board)
     make_move(board,1,6)
     make_move(board,2,3)
-    print_board(board)
     make_move(board,1,6)
-
     print_board(board)
     winner = find_winner(board)
     if winner != 0:
-        print("the winner is player {0}".format(winner))
+        print("the winner is player {0}".format(player_tokens[winner]))
+
+if False:
+    # Test back diag win
+    board = empty_board()
     print_board(board)
+    make_move(board,2,5)
+    make_move(board,2,4)
+    make_move(board,2,4)
+    make_move(board,2,3)
+    make_move(board,2,3)
+    make_move(board,2,3)
+    make_move(board,1,6)
+    make_move(board,1,5)
+    make_move(board,1,4)
+    make_move(board,1,3)
+    print_board(board)
+    winner = find_winner(board)
+    if winner != 0:
+        print("the winner is player {0}".format(player_tokens[winner]))
+
+if True:
+    # Test back diag win
+    board = empty_board()
+    print_board(board)
+    make_move(board,2,5)
+    make_move(board,2,5)
+    make_move(board,2,5)
+    make_move(board,2,4)
+    make_move(board,2,4)
+    make_move(board,2,3)
+    make_move(board,1,2)
+    make_move(board,1,3)
+    make_move(board,1,4)
+    make_move(board,1,5)
+    print_board(board)
+    winner = find_winner(board)
+    if winner != 0:
+        print("the winner is player {0}".format(player_tokens[winner]))
 
