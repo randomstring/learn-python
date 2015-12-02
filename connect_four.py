@@ -31,6 +31,13 @@ def make_move(board,player,column):
             return
     assert False, print('illegal move by player {0} in column {1}'.format(player,column))
 
+def backtrack(board,column):
+    for row in reversed(range(6)):
+        if board[row][column] != 0:
+            board[row][column] = 0
+            return
+    assert False, print('tried to backtrack on empty column {0}',format(column))
+
 def legal_moves(board):
     return [col for col in range(7) if board[5][col] == 0]
 
@@ -41,6 +48,19 @@ def random_move(board,player):
         make_move(board,player,moves[0])
         return
     assert False, print('no more legal moves')
+
+def better_than_random_move(board,player):
+    moves = legal_moves(board)
+    if len(moves) > 0:
+        for c in moves:
+            make_move(board,player,c)
+            if find_winner(board) == player:
+                return
+            backtrack(board,c)
+        # otherwise make a random move
+        random_move(board,player)
+        return
+    assert False, print('no more legal moves')    
 
 def in_bounds(row,col):
     """
@@ -56,11 +76,6 @@ def in_bounds(row,col):
     False
     """
     return row >= 0 and row < 6 and col >= 0 and col < 7
-
-#possible_rows = [s for s in [[r+i for i in range(4)] for r in range(4)] if len(s) == 4]
-#possible_cols = [s for s in [[r+i for i in range(4)] for r in range(3)] if len(s) == 4]
-#all_possible = [[[(r,c) for r in rows] for c in cols] for rows in possible_rows for cols in possible_cols]
-#print(all_possible)
 
 # find_winner()
 #   - given a board, if a player has won, return the player id (1 or 2)
@@ -129,6 +144,17 @@ while False:
         print("the winner is player {0}".format(player_tokens[winner]))
         break
 
+count = 0
+while True:
+    player = (count % 2) + 1
+    better_than_random_move(board,player)
+    print_board(board)
+    winner = find_winner(board)
+    if winner != 0:
+        print("the winner is player {0}".format(player_tokens[winner]))
+        break
+    count = count + 1
+
 if False:
     board = empty_board()
     print_board(board)
@@ -164,7 +190,7 @@ if False:
     if winner != 0:
         print("the winner is player {0}".format(player_tokens[winner]))
 
-if True:
+if False:
     # Test back diag win
     board = empty_board()
     print_board(board)
