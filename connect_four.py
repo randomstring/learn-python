@@ -45,13 +45,16 @@ def backtrack(board,column):
 def legal_moves(board):
     return [col for col in range(7) if board[5][col] == 0]
 
-def score(board,player):
+def score(board,player,depth):
     winner = find_winner(board)
     if winner == player:
         return 1
     elif winner != 0:
         return -1
     # recurse
+    if depth <= 0:
+        # print_board(board)
+        return 0
     moves = legal_moves(board)
     if len(moves) == 0:
         # tie
@@ -61,7 +64,9 @@ def score(board,player):
     next = next_player(player)
     for c in moves:
         make_move(board,player,c)
-        s = score(board,next)
+        # print_board(board)
+        s = score(board,next,depth - 1)
+        # print('score={0}'.format(s))
         backtrack(board,c)
         if s > max:
             max = s
@@ -78,13 +83,17 @@ def best_move(board,player):
     best_move = 0
     for move in moves:
         make_move(board,player,move)
-        s = score(board,next_player(player))
+        s = score(board,next_player(player),5)
         backtrack(board,move)
         if s > best_score:
             best_score = s
             best_move = move
-    if best > 0:
+    if best_score > 0:
         make_move(board,player,best_move)
+        return
+    else:
+        # all moves are losers, make a random move
+        random_move(board,player)
         return
     assert False, print('no more legal moves')
 
