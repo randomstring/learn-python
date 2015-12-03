@@ -21,6 +21,10 @@ def print_board(board):
         print(" ",i+1," ",end="",sep="")
     print("")
 
+def next_player(player):
+    if player == 1:
+        return 2
+    return 1
 
 def make_move(board,player,column):
     assert player >= 1 and player <= 2, "bad player value: %r" % player
@@ -40,6 +44,49 @@ def backtrack(board,column):
 
 def legal_moves(board):
     return [col for col in range(7) if board[5][col] == 0]
+
+def score(board,player):
+    winner = find_winner(board)
+    if winner == player:
+        return 1
+    elif winner != 0:
+        return -1
+    # recurse
+    moves = legal_moves(board)
+    if len(moves) == 0:
+        # tie
+        return 0
+    max = 0
+    min = 0
+    next = next_player(player)
+    for c in moves:
+        make_move(board,player,c)
+        s = score(board,next)
+        backtrack(board,c)
+        if s > max:
+            max = s
+        elif s < min:
+            min = s
+    if player == 1:
+        return max
+    else:
+        return min
+
+def best_move(board,player):
+    moves = legal_moves(board)
+    best_score = -1
+    best_move = 0
+    for move in moves:
+        make_move(board,player,move)
+        s = score(board,next_player(player))
+        backtrack(board,move)
+        if s > best_score:
+            best_score = s
+            best_move = move
+    if best > 0:
+        make_move(board,player,best_move)
+        return
+    assert False, print('no more legal moves')
 
 def random_move(board,player):
     moves = legal_moves(board)
@@ -145,7 +192,7 @@ while False:
         break
 
 count = 0
-while True:
+while False:
     player = (count % 2) + 1
     better_than_random_move(board,player)
     print_board(board)
@@ -154,6 +201,19 @@ while True:
         print("the winner is player {0}".format(player_tokens[winner]))
         break
     count = count + 1
+
+player = 1
+while True:
+    if player == 1:
+        best_move(board,player)
+    else:
+        random_move(board,player)
+    print_board(board)
+    winner = find_winner(board)
+    if winner != 0:
+        print("the winner is player {0}".format(player_tokens[winner]))
+        break
+    player = next_player(player)
 
 if False:
     board = empty_board()
