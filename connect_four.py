@@ -63,10 +63,10 @@ def score(board,player,depth):
     min = 0
     next = next_player(player)
     for c in moves:
-        make_move(board,player,c)
-        #print_board(board)
+        make_move(board,next,c)
+        print_board(board)
         s = score(board,next,depth - 1)
-        #print('score={0}'.format(s))
+        print('score={0}'.format(s))
         backtrack(board,c)
         if s > max:
             max = s
@@ -78,18 +78,20 @@ def score(board,player,depth):
             break
         if  min < 0 and player == 2:
             break
+    # not sure about this
     if player == 1:
         return max
     else:
         return min
 
+max_depth = 1
 def best_move(board,player):
     moves = legal_moves(board)
     best_score = -1
     best_move = 0
     for move in moves:
         make_move(board,player,move)
-        s = score(board,player,4)
+        s = score(board,player,max_depth)
         backtrack(board,move)
         if s > best_score:
             best_score = s
@@ -186,13 +188,24 @@ def find_winner(board):
     return 0
 
 
-
-# play
-board = empty_board()
-print_board(board)
+if True:
+    # Test back diag win using best_move()
+    board = empty_board()
+    make_move(board,2,0)
+    make_move(board,2,1)
+    make_move(board,2,3)
+    make_move(board,1,6)
+    make_move(board,1,5)
+    make_move(board,1,4)
+    print_board(board)
+    best_move(board,1)
+    print_board(board)
+    winner = find_winner(board)
+    if winner != 0:
+        print("the winner is player {0}".format(player_tokens[winner]))
 
 if False:
-    # Test back diag win
+    # Test back diag win using best_move()
     board = empty_board()
     print_board(board)
     make_move(board,2,5)
@@ -239,7 +252,7 @@ while False:
     count = count + 1
 
 player = 1
-while True:
+while False:
     if player == 1:
         best_move(board,player)
     else:
