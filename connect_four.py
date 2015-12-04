@@ -53,38 +53,27 @@ def score(board,player,depth):
         return -1
     # recurse
     if depth <= 0:
-        # print_board(board)
         return 0
     moves = legal_moves(board)
     if len(moves) == 0:
         # tie
         return 0
-    max = 0
-    min = 0
-    next = next_player(player)
-    for c in moves:
-        make_move(board,next,c)
-        print_board(board)
-        s = score(board,next,depth - 1)
-        print('score={0}'.format(s))
-        backtrack(board,c)
-        if s > max:
-            max = s
-        elif s < min:
-            min = s
-        if max > 0 and min < 0:
-            break
-        if max > 0 and player == 1:
-            break
-        if  min < 0 and player == 2:
-            break
+    scores = {(move,score_move(board,player,move,depth-1)) for move in moves}
+    print(scores)
     # not sure about this
+    print_board(board)
     if player == 1:
-        return max
+        return max([score for (move,score) in scores])
     else:
-        return min
+        return min([score for (move,score) in scores])
 
-max_depth = 1
+def score_move(board,player,move,depth):
+    make_move(board,player,move)
+    s = score(board,next_player(player),depth)
+    backtrack(board,move)
+    return s
+
+max_depth = 2
 def best_move(board,player):
     moves = legal_moves(board)
     best_score = -1
