@@ -47,7 +47,7 @@ def legal_moves(board):
 
 def score(board,player,depth):
     winner = find_winner(board)
-    if winner == player:
+    if winner == 1:
         return 1
     elif winner != 0:
         return -1
@@ -60,16 +60,15 @@ def score(board,player,depth):
         return 0
     next = next_player(player)
     scores = {(move,score_move(board,next,move,depth-1)) for move in moves}
-    print(player,scores)
-    # not sure about this
-    print_board(board)
-    if player == 2:
+    print(next,scores)
+    if player == 1:
         return max([score for (move,score) in scores])
     else:
         return min([score for (move,score) in scores])
 
 def score_move(board,player,move,depth):
     make_move(board,player,move)
+    #print("player {0} move {1}: ".format(player,move))
     s = score(board,player,depth)
     backtrack(board,move)
     return s
