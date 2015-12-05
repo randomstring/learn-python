@@ -4,6 +4,7 @@
 # Connect Four
 #
 import random
+from operator import itemgetter
 
 def empty_board(): return [ [ 0 for i in range(7)] for i in range(6)] 
 
@@ -11,14 +12,14 @@ player_tokens = ['.', 'X', 'O']
 
 def print_board(board):
     for (i,row) in reversed(list(enumerate(board))):
-        print("row", (i+1), ":",end="")
+        print("row", i, ":",end="")
         for val in row:
             print(" ",player_tokens[val]," ",end="",sep="")
         print("")
     print("----------------------------")
     print("column:",end="")
     for i in range(7):
-        print(" ",i+1," ",end="",sep="")
+        print(" ",i," ",end="",sep="")
     print("")
 
 def next_player(player):
@@ -76,22 +77,14 @@ def score_move(board,player,move,depth):
 max_depth = 2
 def best_move(board,player):
     moves = legal_moves(board)
-    best_score = -1
-    best_move = 0
-    for move in moves:
-        make_move(board,player,move)
-        s = score(board,player,max_depth)
-        backtrack(board,move)
-        if s > best_score:
-            best_score = s
-            best_move = move
-    if best_score > 0:
-        make_move(board,player,best_move)
-        return
-    else:
-        # all moves are losers, make a random move
-        random_move(board,player)
-        return
+    scores = {(move,score_move(board,player,move,max_depth)) for move in moves}
+    print('best_move: player {0} {1}'.format(player,scores))
+    max_move_score = max(scores,key=itemgetter(1))
+    min_move_score = max(scores,key=itemgetter(1))
+    print('best_move: player {0} max {1}'.format(player,max_move_score))
+    print('best_move: player {0} min {1}'.format(player,min_move_score))
+    make_move(board,player,max_move_score[0])
+    return
     assert False, print('no more legal moves')
 
 def random_move(board,player):
