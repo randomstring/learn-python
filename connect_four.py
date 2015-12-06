@@ -60,7 +60,15 @@ def score(board,player,depth):
         # tie
         return 0
     next = next_player(player)
-    scores = {(move,score_move(board,next,move,depth-1)) for move in moves}
+    scores = []
+    for move in moves:
+        score = score_move(board,next,move,depth-1)
+        scores.append((move,score))
+        if next == 1 and score == 1:
+            return 1
+        if next == 2 and score == -1:
+            return -1
+    # scores = {(move,score_move(board,next,move,depth-1)) for move in moves}
     # print(next,scores)
     if next == 1:
         return max([score for (move,score) in scores])
@@ -170,52 +178,6 @@ def find_winner(board):
                     return player                                    
     return 0
 
-
-if True:
-    # Test if X will block O's winning move
-    for player_a in [1,2]:
-        player_b = next_player(player_a)
-        board = empty_board()
-        make_move(board,player_b,0)
-        make_move(board,player_b,1)
-        make_move(board,player_b,3)
-        make_move(board,player_a,6)
-        make_move(board,player_a,5)
-        make_move(board,player_a,4)
-        print_board(board)
-        best_move(board,player_a)
-        print_board(board)
-        winner = find_winner(board)
-        if board[0][2] == player_a:
-            print('PASS: player_a blocked player_b\'s winning move')
-        else:
-            print('FAILED: player_a did not block player_bs winning move')
-
-
-if True:
-    for player_a in [1,2]:
-        player_b = next_player(player_a)
-        # Test if player_a can find the winning move
-        board = empty_board()
-        make_move(board,player_b,5)
-        make_move(board,player_b,4)
-        make_move(board,player_b,4)
-        make_move(board,player_b,3)
-        make_move(board,player_b,3)
-        make_move(board,player_b,3)
-        make_move(board,player_a,6)
-        make_move(board,player_a,5)
-        make_move(board,player_a,4)
-        # make_move(board,1,3)
-        print_board(board)
-        best_move(board,player_a)
-        print_board(board)
-        winner = find_winner(board)
-        if winner == player_a:
-            print("PASSED: the winner is player {0}".format(player_tokens[winner]))
-        else:
-            print('FAILED: player_a did not detect winning move')
-
 # play a random game
 while False:
     random_move(board,1)
@@ -231,6 +193,7 @@ while False:
         print("the winner is player {0}".format(player_tokens[winner]))
         break
 
+# play random vs. better than random
 count = 0
 while False:
     player = (count % 2) + 1
@@ -242,6 +205,7 @@ while False:
         break
     count = count + 1
 
+# play Computer vs Computer
 player = 1
 board = empty_board()
 while False:
@@ -256,58 +220,111 @@ while False:
         break
     player = next_player(player)
 
-if False:
-    board = empty_board()
-    print_board(board)
-    # Test column win
-    make_move(board,1,6)
-    make_move(board,2,5)
-    make_move(board,1,6)
-    make_move(board,2,4)
-    make_move(board,1,6)
-    make_move(board,2,3)
-    make_move(board,1,6)
-    print_board(board)
-    winner = find_winner(board)
-    if winner != 0:
-        print("the winner is player {0}".format(player_tokens[winner]))
+def tests():
+    '''
+    >>> tests() # doctest:+ELLIPSIS
+    PASS...
+    True
+    '''
+    passed = True
+    for player_a in [1,2]:
+        player_b = next_player(player_a)
 
+        # Test column win
+        board = empty_board()
+        make_move(board,player_a,6)
+        make_move(board,player_b,5)
+        make_move(board,player_a,6)
+        make_move(board,player_b,4)
+        make_move(board,player_a,6)
+        make_move(board,player_b,3)
+        make_move(board,player_a,6)
+        winner = find_winner(board)
+        if winner != player_a:
+            print_board(board)
+            print('FAIL: didn\'t detect {} won on a column'.format(player_tokens[player_a]))
+            passed = False
+        else:
+            print('PASS: player {0} detected column'.format(player_tokens[winner]))
 
-if False:
-    # Test back diag win
-    board = empty_board()
-    print_board(board)
-    make_move(board,2,5)
-    make_move(board,2,4)
-    make_move(board,2,4)
-    make_move(board,2,3)
-    make_move(board,2,3)
-    make_move(board,2,3)
-    make_move(board,1,6)
-    make_move(board,1,5)
-    make_move(board,1,4)
-    make_move(board,1,3)
-    print_board(board)
-    winner = find_winner(board)
-    if winner != 0:
-        print("the winner is player {0}".format(player_tokens[winner]))
+        # Test diag win
+        board = empty_board()
+        make_move(board,player_b,5)
+        make_move(board,player_b,5)
+        make_move(board,player_b,5)
+        make_move(board,player_b,4)
+        make_move(board,player_b,4)
+        make_move(board,player_b,3)
+        make_move(board,player_a,2)
+        make_move(board,player_a,3)
+        make_move(board,player_a,4)
+        make_move(board,player_a,5)
+        winner = find_winner(board)
+        if winner != player_a:
+            print_board(board)
+            print("FAIL: did not detect diag winning condition")
+            passed = False
+        else:
+            print("PASS: player {0} detected diag win".format(player_tokens[winner]))
 
-if False:
-    # Test back diag win
-    board = empty_board()
-    print_board(board)
-    make_move(board,2,5)
-    make_move(board,2,5)
-    make_move(board,2,5)
-    make_move(board,2,4)
-    make_move(board,2,4)
-    make_move(board,2,3)
-    make_move(board,1,2)
-    make_move(board,1,3)
-    make_move(board,1,4)
-    make_move(board,1,5)
-    print_board(board)
-    winner = find_winner(board)
-    if winner != 0:
-        print("the winner is player {0}".format(player_tokens[winner]))
+        # Test back diag win
+        board = empty_board()
+        make_move(board,player_b,5)
+        make_move(board,player_b,4)
+        make_move(board,player_b,4)
+        make_move(board,player_b,3)
+        make_move(board,player_b,3)
+        make_move(board,player_b,3)
+        make_move(board,player_a,6)
+        make_move(board,player_a,5)
+        make_move(board,player_a,4)
+        make_move(board,player_a,3)
+        winner = find_winner(board)
+        if winner != player_a:
+            print_board(board)
+            print("FAIL: did not back diag detect winning condition")
+            passed = False
+        else:
+            print("PASS: player {0} detected back diag win".format(player_tokens[winner]))
 
+    # Test if player_a will block player_B's winning move
+    for player_a in [1,2]:
+        player_b = next_player(player_a)
+        board = empty_board()
+        make_move(board,player_b,0)
+        make_move(board,player_b,1)
+        make_move(board,player_b,3)
+        make_move(board,player_a,6)
+        make_move(board,player_a,5)
+        make_move(board,player_a,4)
+        best_move(board,player_a)
+        winner = find_winner(board)
+        if board[0][2] != player_a:
+            print_board(board)
+            print('FAILED: player_a did not block player_b\'s winning move')
+            passed = False
+        else:
+            print('PASS: player_a blocked player_b\'s winning move')
+
+    # Test if player_a can find the winning move
+    for player_a in [1,2]:
+        player_b = next_player(player_a)
+        board = empty_board()
+        make_move(board,player_b,5)
+        make_move(board,player_b,4)
+        make_move(board,player_b,4)
+        make_move(board,player_b,3)
+        make_move(board,player_b,3)
+        make_move(board,player_b,3)
+        make_move(board,player_a,6)
+        make_move(board,player_a,5)
+        make_move(board,player_a,4)
+        best_move(board,player_a)
+        winner = find_winner(board)
+        if winner != player_a:
+            print_board(board)
+            print('FAILED: player_a did not detect winning move')
+        else:
+            print("PASSED: the winner is player {0}".format(player_tokens[winner]))
+
+    return passed
