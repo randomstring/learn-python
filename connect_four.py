@@ -61,8 +61,8 @@ def score(board,player,depth):
         return 0
     next = next_player(player)
     scores = {(move,score_move(board,next,move,depth-1)) for move in moves}
-    print(next,scores)
-    if player == 1:
+    # print(next,scores)
+    if next == 1:
         return max([score for (move,score) in scores])
     else:
         return min([score for (move,score) in scores])
@@ -74,16 +74,17 @@ def score_move(board,player,move,depth):
     backtrack(board,move)
     return s
 
-max_depth = 2
+max_depth = 3
 def best_move(board,player):
     moves = legal_moves(board)
     scores = {(move,score_move(board,player,move,max_depth)) for move in moves}
-    print('best_move: player {0} {1}'.format(player,scores))
-    max_move_score = max(scores,key=itemgetter(1))
-    min_move_score = max(scores,key=itemgetter(1))
-    print('best_move: player {0} max {1}'.format(player,max_move_score))
-    print('best_move: player {0} min {1}'.format(player,min_move_score))
-    make_move(board,player,max_move_score[0])
+#    print('best_move: player {0} {1}'.format(player,scores))
+    if player == 1:
+        move_score = max(scores,key=itemgetter(1))
+    else:
+        move_score = min(scores,key=itemgetter(1))
+    make_move(board,player,move_score[0])
+    print('best_move: player {0} is {1}'.format(player,move_score))
     return
     assert False, print('no more legal moves')
 
@@ -171,41 +172,49 @@ def find_winner(board):
 
 
 if True:
-    # Test back diag win using best_move()
-    board = empty_board()
-    make_move(board,2,0)
-    make_move(board,2,1)
-    make_move(board,2,3)
-    make_move(board,1,6)
-    make_move(board,1,5)
-    make_move(board,1,4)
-    print_board(board)
-    best_move(board,1)
-    print_board(board)
-    winner = find_winner(board)
-    if winner != 0:
-        print("the winner is player {0}".format(player_tokens[winner]))
+    # Test if X will block O's winning move
+    for player_a in [1,2]:
+        player_b = next_player(player_a)
+        board = empty_board()
+        make_move(board,player_b,0)
+        make_move(board,player_b,1)
+        make_move(board,player_b,3)
+        make_move(board,player_a,6)
+        make_move(board,player_a,5)
+        make_move(board,player_a,4)
+        print_board(board)
+        best_move(board,player_a)
+        print_board(board)
+        winner = find_winner(board)
+        if board[0][2] == player_a:
+            print('PASS: player_a blocked player_b\'s winning move')
+        else:
+            print('FAILED: player_a did not block player_bs winning move')
 
-if False:
-    # Test back diag win using best_move()
-    board = empty_board()
-    print_board(board)
-    make_move(board,2,5)
-    make_move(board,2,4)
-    make_move(board,2,4)
-    make_move(board,2,3)
-    make_move(board,2,3)
-    make_move(board,2,3)
-    make_move(board,1,6)
-    make_move(board,1,5)
-    make_move(board,1,4)
-    # make_move(board,1,3)
-    print_board(board)
-    best_move(board,1)
-    print_board(board)
-    winner = find_winner(board)
-    if winner != 0:
-        print("the winner is player {0}".format(player_tokens[winner]))
+
+if True:
+    for player_a in [1,2]:
+        player_b = next_player(player_a)
+        # Test if player_a can find the winning move
+        board = empty_board()
+        make_move(board,player_b,5)
+        make_move(board,player_b,4)
+        make_move(board,player_b,4)
+        make_move(board,player_b,3)
+        make_move(board,player_b,3)
+        make_move(board,player_b,3)
+        make_move(board,player_a,6)
+        make_move(board,player_a,5)
+        make_move(board,player_a,4)
+        # make_move(board,1,3)
+        print_board(board)
+        best_move(board,player_a)
+        print_board(board)
+        winner = find_winner(board)
+        if winner == player_a:
+            print("PASSED: the winner is player {0}".format(player_tokens[winner]))
+        else:
+            print('FAILED: player_a did not detect winning move')
 
 # play a random game
 while False:
@@ -234,11 +243,12 @@ while False:
     count = count + 1
 
 player = 1
+board = empty_board()
 while False:
     if player == 1:
         best_move(board,player)
     else:
-        random_move(board,player)
+        best_move(board,player)
     print_board(board)
     winner = find_winner(board)
     if winner != 0:
