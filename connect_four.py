@@ -10,6 +10,11 @@ def empty_board(): return [ [ 0 for i in range(7)] for i in range(6)]
 
 player_tokens = ['.', 'X', 'O']
 
+board_scores = {}
+
+def board_key(board):
+    return ''.join(str(board[r][c]) for r in range(6) for c in range(7))
+
 def print_board(board):
     for (i,row) in reversed(list(enumerate(board))):
         print("row", i, ":",end="")
@@ -52,6 +57,9 @@ def score(board,player,depth):
         return 1
     elif winner != 0:
         return -1
+    key = board_key(board)
+    if key in board_scores:
+        return board_scores[key]
     # recurse
     if depth <= 0:
         return 0
@@ -65,35 +73,39 @@ def score(board,player,depth):
         score = score_move(board,next,move,depth-1)
         scores.append((move,score))
         if next == 1 and score == 1:
-            return 1
+            break
         if next == 2 and score == -1:
-            return -1
+            break
     # scores = {(move,score_move(board,next,move,depth-1)) for move in moves}
     # print(next,scores)
     if next == 1:
-        return max([score for (move,score) in scores])
+        score = max([score for (move,score) in scores])
     else:
-        return min([score for (move,score) in scores])
+        score = min([score for (move,score) in scores])
+    #print(key,score)
+    board_scores[key]= score
+    return score
 
 def score_move(board,player,move,depth):
     make_move(board,player,move)
-    #print("player {0} move {1}: ".format(player,move))
     s = score(board,player,depth)
     backtrack(board,move)
     return s
 
-max_depth = 3
+max_depth = 6
 def best_move(board,player):
     moves = legal_moves(board)
-    scores = {(move,score_move(board,player,move,max_depth)) for move in moves}
-#    print('best_move: player {0} {1}'.format(player,scores))
-    if player == 1:
-        move_score = max(scores,key=itemgetter(1))
-    else:
-        move_score = min(scores,key=itemgetter(1))
-    make_move(board,player,move_score[0])
-    print('best_move: player {0} is {1}'.format(player,move_score))
-    return
+    if (len(moves) > 0):
+        scores = {(move,score_move(board,player,move,max_depth)) for move in moves}
+        #    print('best_move: player {0} {1}'.format(player,scores))
+        if player == 1:
+            move_score = max(scores,key=itemgetter(1))
+        else:
+            move_score = min(scores,key=itemgetter(1))
+        make_move(board,player,move_score[0])
+        print('best_move: player {0} is {1} score {2}'.format(player,move_score[0],move_score[1]))
+        return
+    print_board(board)
     assert False, print('no more legal moves')
 
 def random_move(board,player):
@@ -205,20 +217,21 @@ while False:
         break
     count = count + 1
 
-# play Computer vs Computer
-player = 1
-board = empty_board()
-while False:
-    if player == 1:
-        best_move(board,player)
-    else:
-        best_move(board,player)
-    print_board(board)
-    winner = find_winner(board)
-    if winner != 0:
-        print("the winner is player {0}".format(player_tokens[winner]))
-        break
-    player = next_player(player)
+def computer_vs_computer():
+    # play Computer vs Computer
+    player = 1
+    board = empty_board()
+    while True:
+        if player == 1:
+            best_move(board,player)
+        else:
+            best_move(board,player)
+        print_board(board)
+        winner = find_winner(board)
+        if winner != 0:
+            print("the winner is player {0}".format(player_tokens[winner]))
+            break
+        player = next_player(player)
 
 def tests():
     '''
@@ -328,3 +341,5 @@ def tests():
             print("PASSED: the winner is player {0}".format(player_tokens[winner]))
 
     return passed
+
+computer_vs_computer()
