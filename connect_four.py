@@ -10,8 +10,7 @@ def empty_board(): return [ [ 0 for i in range(7)] for i in range(6)]
 
 player_tokens = ['.', 'X', 'O']
 
-board_scores = {}
-
+# make a unique key for a given board condition
 def board_key(board):
     return ''.join(str(board[r][c]) for r in range(6) for c in range(7))
 
@@ -60,7 +59,7 @@ def score(board,player,depth):
     key = board_key(board)
     # recurse
     if depth <= 0:
-        return 0
+        return estimated_score(board)
     moves = legal_moves(board)
     if len(moves) == 0:
         # tie
@@ -106,8 +105,8 @@ def best_move(board,player):
         reverse = False
         if player == 1:
             reverse = True
-        sorted(estimated_scores, key=itemgetter(1), reverse=reverse) 
-        print('best_move: player {0} {1}'.format(player,estimated_scores))
+        estimated_scores = sorted(estimated_scores, key=itemgetter(1), reverse=reverse) 
+        print('best_move: player {0} {1}'.format(player_tokens[player],estimated_scores))
 
         best = (-1,0)
         for (move,est_score) in estimated_scores:
@@ -117,18 +116,12 @@ def best_move(board,player):
                 best = (move,score)
 
             if player == 1:
-                if score == 1:
-                    best = (move,score)
-                    break
-                elif score > best[1]:
+                if score > best[1]:
                     best = (move,score)
                 elif score < best[1]:
                     break
             else:
-                if score == -1:
-                    best = (move,score)
-                    break
-                elif score < best[1]:
+                if score < best[1]:
                     best = (move,score)
                 elif score > best[1]:
                     break
@@ -225,15 +218,16 @@ def score_delta(player,count,blocked):
     score = 0
     if count >= 4:
         if player == 1:
-            return 100
+            return 1
         else:
-            return -100
+            return -1
     if blocked != 0:
         return 0
     if count == 3:
-        score = 0.01
+        score = 0.001
     elif count == 2:
-        score = 0.0001
+        score = 0.00001
+
     if player == 1:
         return score
     else:
@@ -254,6 +248,7 @@ def estimated_score(board):
                 player = board[r][c]
                 opponent = next_player(player)
                 # check for win in the col
+
                 count = 1
                 blocked = 0
                 for ri in range(r+1,6):
@@ -292,6 +287,11 @@ def estimated_score(board):
                         blocked == 1
 
                 score += score_delta(player,count,blocked)
+    if score > 1:
+        score = 0.99999999
+    if score < -1:
+        score = -0.99999999
+
     return score
 
 # play a random game
@@ -452,5 +452,5 @@ def tests():
 
     return passed
 
-tests()
+#tests()
 computer_vs_computer()
