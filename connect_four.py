@@ -58,8 +58,6 @@ def score(board,player,depth):
     elif winner != 0:
         return -1
     key = board_key(board)
-    if key in board_scores:
-        return board_scores[key]
     # recurse
     if depth <= 0:
         return 0
@@ -70,40 +68,73 @@ def score(board,player,depth):
     next = next_player(player)
     scores = []
     for move in moves:
-        score = score_move(board,next,move,depth-1)
+        score = move_score(board,next,move,depth-1)
         scores.append((move,score))
         if next == 1 and score == 1:
             break
         if next == 2 and score == -1:
             break
-    # scores = {(move,score_move(board,next,move,depth-1)) for move in moves}
+    # scores = {(move,move_score (board,next,move,depth-1)) for move in moves}
     # print(next,scores)
     if next == 1:
         score = max([score for (move,score) in scores])
     else:
         score = min([score for (move,score) in scores])
-    #print(key,score)
-    board_scores[key]= score
     return score
 
-def score_move(board,player,move,depth):
+def estimated_move_score(board,player,move):
+    make_move(board,player,move)
+    s = estimated_score(board)
+    backtrack(board,move)
+    return s
+
+def move_score(board,player,move,depth):
     make_move(board,player,move)
     s = score(board,player,depth)
     backtrack(board,move)
     return s
 
-max_depth = 6
+max_depth = 4
 def best_move(board,player):
+    if board[0][3] == 0:
+        # special case for best first move
+        make_move(board,player,3)
+        return
     moves = legal_moves(board)
     if (len(moves) > 0):
-        scores = {(move,score_move(board,player,move,max_depth)) for move in moves}
-        #    print('best_move: player {0} {1}'.format(player,scores))
+        estimated_scores = {(move,estimated_move_score(board,player,move)) for move in moves}
+        reverse = False
         if player == 1:
-            move_score = max(scores,key=itemgetter(1))
-        else:
-            move_score = min(scores,key=itemgetter(1))
-        make_move(board,player,move_score[0])
-        print('best_move: player {0} is {1} score {2}'.format(player,move_score[0],move_score[1]))
+            reverse = True
+        sorted(estimated_scores, key=itemgetter(1), reverse=reverse) 
+        print('best_move: player {0} {1}'.format(player,estimated_scores))
+
+        best = (-1,0)
+        for (move,est_score) in estimated_scores:
+            score = move_score(board,player,move,max_depth)
+            
+            if best[0] == -1:
+                best = (move,score)
+
+            if player == 1:
+                if score == 1:
+                    best = (move,score)
+                    break
+                elif score > best[1]:
+                    best = (move,score)
+                elif score < best[1]:
+                    break
+            else:
+                if score == -1:
+                    best = (move,score)
+                    break
+                elif score < best[1]:
+                    best = (move,score)
+                elif score > best[1]:
+                    break
+
+        make_move(board,player,best[0])
+        print('best_move: player {0} is {1} score {2}'.format(player,best[0],best[1]))
         return
     print_board(board)
     assert False, print('no more legal moves')
@@ -190,6 +221,79 @@ def find_winner(board):
                     return player                                    
     return 0
 
+def score_delta(player,count,blocked):
+    score = 0
+    if count >= 4:
+        if player == 1:
+            return 100
+        else:
+            return -100
+    if blocked != 0:
+        return 0
+    if count == 3:
+        score = 0.01
+    elif count == 2:
+        score = 0.0001
+    if player == 1:
+        return score
+    else:
+        return -score
+
+
+# score position by creating an estimate of how many win posibilities
+#   Given a board
+#   a) return 1 if player 1 won
+#   b) return -1 if player 2 won
+#   c) otherwise return a heuristic score of who's winning
+def estimated_score(board):
+    player = 0
+    score = 0
+    for r in range(6):
+        for c in range(7):
+            if board[r][c] != 0:
+                player = board[r][c]
+                opponent = next_player(player)
+                # check for win in the col
+                count = 1
+                blocked = 0
+                for ri in range(r+1,6):
+                    if board[ri][c] == player:
+                        count = count + 1
+                    elif board[ri][c] == opponent:
+                        blocked = 1
+                score += score_delta(player,count,blocked)
+
+                # check for win in the row
+                count = 1
+                blocked = 0
+                for ci in range(c+1,7):
+                    if board[r][ci] == player:
+                        count = count + 1
+                    elif board[r][ci] == opponent:
+                        blocked = 1
+                score += score_delta(player,count,blocked)
+
+                # check diagonals
+                count = 1
+                blocked = 0
+                for (ri,ci) in zip(range(r+1,6),range(c+1,7)):
+                    if board[ri][ci] == player:
+                        count = count + 1
+                    elif board[ri][ci] == opponent:
+                        blocked = 1
+                score += score_delta(player,count,blocked)
+
+                count = 1
+                blocked = 0
+                for (ri,ci) in zip(range(r+1,6),reversed(range(0,c))):
+                    if board[ri][ci] == player:
+                        count = count + 1
+                    elif board[ri][ci] == opponent:
+                        blocked == 1
+
+                score += score_delta(player,count,blocked)
+    return score
+
 # play a random game
 while False:
     random_move(board,1)
@@ -221,17 +325,23 @@ def computer_vs_computer():
     # play Computer vs Computer
     player = 1
     board = empty_board()
+    moves = 0
     while True:
         if player == 1:
             best_move(board,player)
         else:
             best_move(board,player)
+        moves += 1
         print_board(board)
         winner = find_winner(board)
         if winner != 0:
             print("the winner is player {0}".format(player_tokens[winner]))
             break
         player = next_player(player)
+        if moves >= 42:
+            print("TIE!")
+            break
+            
 
 def tests():
     '''
@@ -342,4 +452,5 @@ def tests():
 
     return passed
 
+tests()
 computer_vs_computer()
