@@ -50,13 +50,16 @@ def backtrack(board,column):
 def legal_moves(board):
     return [col for col in range(7) if board[5][col] == 0]
 
-def score(board,player,depth):
+# used for alpha beta limits
+neg_inf = -10000
+pos_inf =  10000
+
+def score(board,player,alpha,beta,depth):
     winner = find_winner(board)
     if winner == 1:
         return 1
     elif winner != 0:
         return -1
-    key = board_key(board)
     # recurse
     if depth <= 0:
         return estimated_score(board)
@@ -66,20 +69,27 @@ def score(board,player,depth):
         return 0
     next = next_player(player)
     scores = []
-    for move in moves:
-        score = move_score(board,next,move,depth-1)
-        scores.append((move,score))
-        if next == 1 and score == 1:
-            break
-        if next == 2 and score == -1:
-            break
-    # scores = {(move,move_score (board,next,move,depth-1)) for move in moves}
-    # print(next,scores)
-    if next == 1:
-        score = max([score for (move,score) in scores])
+    if player == 1:
+        # maximize score for this player
+        v = neg_inf
+        for move in moves:
+            v = max(v, move_score(board, next, move, alpha, beta, depth - 1))
+            alpha = max(alpha, v)
+            if beta <= alpha:
+                # Beta cut-off
+                break
+        return v
     else:
-        score = min([score for (move,score) in scores])
-    return score
+        # minimize score for this player
+        v = pos_inf
+        for move in moves:
+            v = min(v, move_score(board, next, move, alpha, beta, depth - 1))
+            beta = min(beta, v)
+            if beta <= alpha:
+                # alpha cut-off
+                break
+        return v
+
 
 def estimated_move_score(board,player,move):
     make_move(board,player,move)
@@ -87,9 +97,9 @@ def estimated_move_score(board,player,move):
     backtrack(board,move)
     return s
 
-def move_score(board,player,move,depth):
+def move_score(board,player,move,alpha,beta,depth):
     make_move(board,player,move)
-    s = score(board,player,depth)
+    s = score(board,player,alpha,beta,depth)
     backtrack(board,move)
     return s
 
@@ -110,7 +120,7 @@ def best_move(board,player):
 
         best = (-1,0)
         for (move,est_score) in estimated_scores:
-            score = move_score(board,player,move,max_depth)
+            score = move_score(board,player,move,neg_inf,pos_inf,max_depth)
             
             if best[0] == -1:
                 best = (move,score)
