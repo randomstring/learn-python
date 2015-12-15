@@ -10,6 +10,8 @@ def empty_board(): return [ [ 0 for i in range(7)] for i in range(6)]
 
 player_tokens = ['.', 'X', 'O']
 
+debug = 0
+
 # make a unique key for a given board condition
 def board_key(board):
     return ''.join(str(board[r][c]) for r in range(6) for c in range(7))
@@ -93,7 +95,11 @@ def score(board,player,alpha,beta,depth):
 
 def estimated_move_score(board,player,move):
     make_move(board,player,move)
+    debug = 1
     s = estimated_score(board)
+    print_board(board)
+    print('estimated score: {0}'.format(s))
+    debug = 0
     backtrack(board,move)
     return s
 
@@ -116,7 +122,7 @@ def best_move(board,player):
         if player == 1:
             reverse = True
         estimated_scores = sorted(estimated_scores, key=itemgetter(1), reverse=reverse) 
-        print('best_move: player {0} {1}'.format(player_tokens[player],estimated_scores))
+        print('best_move: estimated scores player {0} {1}'.format(player_tokens[player],estimated_scores))
 
         best = (-1,0)
         for (move,est_score) in estimated_scores:
@@ -224,21 +230,23 @@ def find_winner(board):
                     return player                                    
     return 0
 
-def score_delta(player,count,blocked):
+def score_delta(player,count,blocked,free):
     score = 0
-    if blocked != 0:
-        return 0
-    if count >= 4:
-        score = 1
-    elif count == 3:
-        score = 0.0001
-    elif count == 2:
-        score = 0.0000001
+    if blocked == 0 and count + free >= 4:
+        if count >= 4:
+            score = 1
+        elif count == 3:
+            score = 0.0001
+        elif count == 2:
+            score = 0.0000001
+           
+    if player == 2:
+        score = -score
 
-    if player == 1:
-        return score
-    else:
-        return -score
+    if False:
+        print('score_delta: {0} c={1} b={2} f={3} score={4}:'.format(player,count,blocked,free,score))
+
+    return score
 
 
 # score position by creating an estimate of how many win posibilities
@@ -254,45 +262,69 @@ def estimated_score(board):
             if board[r][c] != 0:
                 player = board[r][c]
                 opponent = next_player(player)
-                # check for win in the col
 
+                # check for win in the col
                 count = 1
                 blocked = 0
+                free = 0
                 for ri in range(r+1,6):
+                    if count + free >= 4:
+                        break
                     if board[ri][c] == player:
                         count += 1
                     elif board[ri][c] == opponent:
                         blocked = 1
-                score += score_delta(player,count,blocked)
+                        break
+                    else:
+                        free += 1
+                score += score_delta(player,count,blocked,free)
 
                 # check for win in the row
                 count = 1
                 blocked = 0
+                free = 0
                 for ci in range(c+1,7):
+                    if count + free >= 4:
+                        break
                     if board[r][ci] == player:
                         count += 1
                     elif board[r][ci] == opponent:
                         blocked = 1
-                score += score_delta(player,count,blocked)
+                        break
+                    else:
+                        free += 1
+                score += score_delta(player,count,blocked,free)
 
                 # check diagonals
                 count = 1
                 blocked = 0
+                free = 0
                 for (ri,ci) in zip(range(r+1,6),range(c+1,7)):
+                    if count + free >= 4:
+                        break
                     if board[ri][ci] == player:
                         count += 1
                     elif board[ri][ci] == opponent:
                         blocked = 1
-                score += score_delta(player,count,blocked)
+                        break
+                    else:
+                        free += 1
+                score += score_delta(player,count,blocked,free)
 
                 count = 1
                 blocked = 0
+                free = 0
                 for (ri,ci) in zip(range(r+1,6),reversed(range(0,c))):
+                    if count + free >= 4:
+                        break
                     if board[ri][ci] == player:
                         count += 1
                     elif board[ri][ci] == opponent:
                         blocked = 1
-                score += score_delta(player,count,blocked)
+                        break
+                    else:
+                        free += 1
+                score += score_delta(player,count,blocked,free)
 
     if score > 1:
         score = 1
