@@ -255,6 +255,12 @@ def score_delta(player,count,blocked,free):
 #   b) return -1 if player 2 won
 #   c) otherwise return a heuristic score of who's winning
 def estimated_score(board):
+    win = find_winner(board)
+    if win != 0:
+        if win == 1:
+            return 1
+        else:
+            return -1
     player = 0
     score = 0
     for r in range(6):
