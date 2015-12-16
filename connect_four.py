@@ -42,6 +42,16 @@ def make_move(board,player,column):
             return
     assert False, print('illegal move by player {0} in column {1}'.format(player,column))
 
+#
+# Make a series of moves, alternating players, starting with
+# player. Returns next player to move.
+#
+def make_moves(board,player,moves):
+    for move in moves:
+        make_move(board,player,move)
+        player = next_player(player)
+    return player
+
 def backtrack(board,column):
     for row in reversed(range(6)):
         if board[row][column] != 0:
@@ -70,12 +80,16 @@ def score(board,player,alpha,beta,depth):
         # tie
         return 0
     next = next_player(player)
-    scores = []
+    if debug:
+        print_board(board)
     if player == 1:
         # maximize score for this player
         v = neg_inf
         for move in moves:
-            v = max(v, move_score(board, next, move, alpha, beta, depth - 1))
+            s = move_score(board, next, move, alpha, beta, depth - 1)
+            if debug:
+                print('{0} m={1} s={2} v={3} a={4} b={5}'.format(player_tokens[player],move,s,v,alpha,beta))
+            v = max(v, s)
             alpha = max(alpha, v)
             if beta <= alpha:
                 # Beta cut-off
@@ -85,7 +99,10 @@ def score(board,player,alpha,beta,depth):
         # minimize score for this player
         v = pos_inf
         for move in moves:
-            v = min(v, move_score(board, next, move, alpha, beta, depth - 1))
+            s = move_score(board, next, move, alpha, beta, depth - 1)
+            if debug:
+                print('{0} m={1} s={2}'.format(player_tokens[player],move,s))
+            v = min(v, s)
             beta = min(beta, v)
             if beta <= alpha:
                 # alpha cut-off
@@ -95,11 +112,10 @@ def score(board,player,alpha,beta,depth):
 
 def estimated_move_score(board,player,move):
     make_move(board,player,move)
-    debug = 1
     s = estimated_score(board)
-    print_board(board)
-    print('estimated score: {0}'.format(s))
-    debug = 0
+    if debug:
+        print_board(board)
+        print('estimated score: {0}'.format(s))
     backtrack(board,move)
     return s
 
@@ -122,7 +138,8 @@ def best_move(board,player):
         if player == 1:
             reverse = True
         estimated_scores = sorted(estimated_scores, key=itemgetter(1), reverse=reverse) 
-        print('best_move: estimated scores player {0} {1}'.format(player_tokens[player],estimated_scores))
+        if debug:
+            print('best_move: estimated scores player {0} {1}'.format(player_tokens[player],estimated_scores))
 
         best = (-1,0)
         for (move,est_score) in estimated_scores:
@@ -143,7 +160,8 @@ def best_move(board,player):
                     break
 
         make_move(board,player,best[0])
-        print('best_move: player {0} is {1} score {2}'.format(player,best[0],best[1]))
+        if debug:
+            print('best_move: player {0} is {1} score {2}'.format(player,best[0],best[1]))
         return
     print_board(board)
     assert False, print('no more legal moves')
@@ -498,4 +516,4 @@ def tests():
     return passed
 
 #tests()
-computer_vs_computer()
+#computer_vs_computer()
