@@ -473,7 +473,7 @@ def tests():
         winner = find_winner(board)
         if board[0][2] != player_a:
             print_board(board)
-            print('FAILED: player_a did not block player_b\'s winning move')
+            print('FAIL: player_a did not block player_b\'s winning move')
             passed = False
         else:
             print('PASS: player_a blocked player_b\'s winning move')
@@ -495,11 +495,31 @@ def tests():
         winner = find_winner(board)
         if winner != player_a:
             print_board(board)
-            print('FAILED: player_a did not detect winning move')
+            print('FAIL: player_a did not detect winning move')
+            passed = False
         else:
             print("PASSED: the winner is player {0}".format(player_tokens[winner]))
 
+    # More complicated test, O must block X in column 4.
+    #
+    # row 5 : .  .  .  .  .  .  .
+    # row 4 : .  .  .  .  X  .  .
+    # row 3 : .  .  X  X  X  .  .
+    # row 2 : .  .  O  O  X  .  O
+    # row 1 : .  .  X  O  O  .  O
+    # row 0 : .  X  O  X  O  .  X
+    # ----------------------------
+    # column: 0  1  2  3  4  5  6
+    board = empty_board()
+    moves = [3,4,1,4,4,2,2,2,2,3,6,3,3,6,4,6,4]
+    make_moves(board,1,moves)
+    best_move(board,2)
+    if board[5][4] != 2:
+        print_board(board)
+        print('FAIL: O did not block winning move')
+        passed = False
+    else:
+        print('PASSED: O blocked winning move.')
+
     return passed
 
-#tests()
-#computer_vs_computer()
