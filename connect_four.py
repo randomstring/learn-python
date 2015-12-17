@@ -11,6 +11,7 @@ def empty_board(): return [ [ 0 for i in range(7)] for i in range(6)]
 player_tokens = ['.', 'X', 'O']
 
 debug = 0
+max_depth = 5
 
 # make a unique key for a given board condition
 def board_key(board):
@@ -66,48 +67,60 @@ def legal_moves(board):
 neg_inf = -10000
 pos_inf =  10000
 
+#
+# return best move and the corresponding score
+#
 def score(board,player,alpha,beta,depth):
+    best_move = -1
     winner = find_winner(board)
     if winner == 1:
-        return 1
+        return (-1,1)
     elif winner != 0:
-        return -1
+        return (-1,-1)
     # recurse
     if depth <= 0:
-        return estimated_score(board)
+        return (-1,estimated_score(board))
     moves = legal_moves(board)
     if len(moves) == 0:
         # tie
-        return 0
+        return (-1,0)
     next = next_player(player)
     if debug:
+        print('score() {0} d={1}'.format(player_tokens[player],depth))
         print_board(board)
     if player == 1:
         # maximize score for this player
         v = neg_inf
         for move in moves:
-            s = move_score(board, next, move, alpha, beta, depth - 1)
+            make_move(board,player,move)
+            (b,s) = score(board, next, alpha, beta, depth - 1)
+            backtrack(board,move)
             if debug:
-                print('{0} m={1} s={2} v={3} a={4} b={5}'.format(player_tokens[player],move,s,v,alpha,beta))
-            v = max(v, s)
+                print('{0} m={1} s={2} v={3} a={4} b={5}'.format(player_tokens[next],move,s,v,alpha,beta))
+            if s > v:
+                v = s
+                best_move = move
             alpha = max(alpha, v)
             if beta <= alpha:
                 # Beta cut-off
                 break
-        return v
     else:
         # minimize score for this player
         v = pos_inf
         for move in moves:
-            s = move_score(board, next, move, alpha, beta, depth - 1)
+            make_move(board,player,move)
+            (b,s) = score(board, next, alpha, beta, depth - 1)
+            backtrack(board,move)
             if debug:
-                print('{0} m={1} s={2}'.format(player_tokens[player],move,s))
-            v = min(v, s)
+                print('{0} m={1} s={2}'.format(player_tokens[next],move,s))
+            if s < v:
+                v = s
+                best_move = move
             beta = min(beta, v)
             if beta <= alpha:
                 # alpha cut-off
                 break
-        return v
+    return (best_move,v)
 
 
 def estimated_move_score(board,player,move):
@@ -121,48 +134,24 @@ def estimated_move_score(board,player,move):
 
 def move_score(board,player,move,alpha,beta,depth):
     make_move(board,player,move)
-    s = score(board,player,alpha,beta,depth)
+    (best_move,s) = score(board,player,alpha,beta,depth)
     backtrack(board,move)
     return s
 
-max_depth = 6
 def best_move(board,player):
     if board[0][3] == 0:
         # special case for best first move
         make_move(board,player,3)
         return
-    moves = legal_moves(board)
-    if (len(moves) > 0):
-        estimated_scores = {(move,estimated_move_score(board,player,move)) for move in moves}
-        reverse = False
-        if player == 1:
-            reverse = True
-        estimated_scores = sorted(estimated_scores, key=itemgetter(1), reverse=reverse) 
+    (best_move,s) = score(board,player,neg_inf,pos_inf,max_depth)
+    if best_move == -1:
+        print("No move possible, or game over")
+    else:
         if debug:
-            print('best_move: estimated scores player {0} {1}'.format(player_tokens[player],estimated_scores))
-
-        best = (-1,0)
-        for (move,est_score) in estimated_scores:
-            score = move_score(board,player,move,neg_inf,pos_inf,max_depth)
-            
-            if best[0] == -1:
-                best = (move,score)
-
-            if player == 1:
-                if score > best[1]:
-                    best = (move,score)
-                elif score < best[1]:
-                    break
-            else:
-                if score < best[1]:
-                    best = (move,score)
-                elif score > best[1]:
-                    break
-
-        make_move(board,player,best[0])
-        if debug:
-            print('best_move: player {0} is {1} score {2}'.format(player,best[0],best[1]))
+            print('best_move: player {0} is {1} score {2}'.format(player,best_move,s))
+        make_move(board,player,best_move)
         return
+
     print_board(board)
     assert False, print('no more legal moves')
 
@@ -390,10 +379,7 @@ def computer_vs_computer():
     board = empty_board()
     moves = 0
     while True:
-        if player == 1:
-            best_move(board,player)
-        else:
-            best_move(board,player)
+        best_move(board,player)
         moves += 1
         print_board(board)
         winner = find_winner(board)
