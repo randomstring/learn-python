@@ -10,7 +10,10 @@ def empty_board(): return [ [ 0 for i in range(7)] for i in range(6)]
 
 player_tokens = ['.', 'X', 'O']
 
+# turn on debugging output for move scoring
 debug = 0
+
+# max look ahead depth
 max_depth = 5
 
 # make a unique key for a given board condition
@@ -29,11 +32,13 @@ def print_board(board):
         print(" ",i," ",end="",sep="")
     print("")
 
+# given a player, return the next player 
 def next_player(player):
     if player == 1:
         return 2
     return 1
 
+# make a move
 def make_move(board,player,column):
     assert player >= 1 and player <= 2, "bad player value: %r" % player
     assert column >= 0 and column <= 6, "bad column value: %r" % column
@@ -53,6 +58,9 @@ def make_moves(board,player,moves):
         player = next_player(player)
     return player
 
+#
+# Backtrack: undo a given move
+#
 def backtrack(board,column):
     for row in reversed(range(6)):
         if board[row][column] != 0:
@@ -60,10 +68,13 @@ def backtrack(board,column):
             return
     assert False, print('tried to backtrack on empty column {0}',format(column))
 
+#
+# legal_moves(): return a list of all legal moves
+#
 def legal_moves(board):
     return [col for col in range(7) if board[5][col] == 0]
 
-# used for alpha beta limits
+# Constants used for alpha beta limits
 neg_inf = -10000
 pos_inf =  10000
 
@@ -155,6 +166,9 @@ def best_move(board,player):
     print_board(board)
     assert False, print('no more legal moves')
 
+#
+# Make a random move
+#
 def random_move(board,player):
     moves = legal_moves(board)
     if len(moves) > 0:
@@ -163,6 +177,9 @@ def random_move(board,player):
         return
     assert False, print('no more legal moves')
 
+#
+# If the player can win, win. Otherwise make a random move.
+#
 def better_than_random_move(board,player):
     moves = legal_moves(board)
     if len(moves) > 0:
@@ -176,6 +193,7 @@ def better_than_random_move(board,player):
         return
     assert False, print('no more legal moves')    
 
+# test if a given coordinate is in bounds of the board. Not used.
 def in_bounds(row,col):
     """
     >>> in_bounds(0,0)
@@ -237,6 +255,12 @@ def find_winner(board):
                     return player                                    
     return 0
 
+#
+# Calculate an estimated score delta, given a potential winning row/col/diagonal.
+#
+# 3 in a rows are worth more than 2 in a rows. 
+# additional estimated score is 0 if the play is blocked already
+#
 def score_delta(player,count,blocked,free):
     score = 0
     if blocked == 0 and count + free >= 4:
