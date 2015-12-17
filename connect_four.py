@@ -14,7 +14,8 @@ player_tokens = ['.', 'X', 'O']
 debug = 0
 
 # max look ahead depth
-max_depth = 5
+# depth 7 doesn't play a perfect game, but plays strongly and isn't overly slow
+max_depth = 7
 
 # make a unique key for a given board condition
 def board_key(board):
