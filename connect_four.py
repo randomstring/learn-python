@@ -149,11 +149,14 @@ def move_score(board,player,move,alpha,beta,depth):
     backtrack(board,move)
     return s
 
+#
+# Make best move, return the move location
+#
 def best_move(board,player):
     if board[0][3] == 0:
         # special case for best first move
         make_move(board,player,3)
-        return
+        return 3
     (best_move,s) = score(board,player,neg_inf,pos_inf,max_depth)
     if best_move == -1:
         print("No move possible, or game over")
@@ -161,7 +164,7 @@ def best_move(board,player):
         if debug:
             print('best_move: player {0} is {1} score {2}'.format(player,best_move,s))
         make_move(board,player,best_move)
-        return
+        return best_move
 
     print_board(board)
     assert False, print('no more legal moves')
@@ -409,6 +412,45 @@ def computer_vs_computer():
         winner = find_winner(board)
         if winner != 0:
             print("the winner is player {0}".format(player_tokens[winner]))
+            break
+        player = next_player(player)
+        if moves >= 42:
+            print("TIE!")
+            break
+
+def get_human_move(board):
+    move = -1
+    legal = legal_moves(board)
+    while move not in legal:
+        move = int(input('Enter your move: '))
+        if move not in legal:
+            print('Ooops, that move is not valid. Your legal moves are: {0}'.format(legal))
+    return move
+
+def human_vs_computer(human):
+    # play Human vs Computer
+    board = empty_board()
+    moves = 0
+    player = 1
+
+    if human == player:
+        print('You go first, you are playing {0}.'.format(player_tokens[player]))
+    else:
+        print('I go first, I play as {0} you play as {1}.'.format(player_tokens[player],player_toeksn[next_player(player)]))
+    print_board(board)
+
+    while True:
+        if human == player:
+            move = get_human_move(board)
+            make_move(board,player,move)
+        else:
+            move = best_move(board,player)
+            print('I place my {0} in column {1}'.format(player_tokens[player],move))
+        moves += 1
+        print_board(board)
+        winner = find_winner(board)
+        if winner != 0:
+            print("The winner is player {0}".format(player_tokens[winner]))
             break
         player = next_player(player)
         if moves >= 42:
