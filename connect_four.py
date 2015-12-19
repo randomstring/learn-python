@@ -518,14 +518,22 @@ def tests():
             print('PASS: player_a blocked player_b\'s winning move')
 
     # Test if player_a can find the winning move
+    #        .  .  .  .  .  .  .
+    #        .  .  .  .  .  .  .
+    #        .  .  .  .  .  .  .
+    #        .  .  .  O  X  .  .
+    #        .  .  .  O  O  X  .
+    #        X  X  X  O  O  O  X
+    #----------------------------
+    #column: 0  1  2  3  4  5  6
     for player_a in [1,2]:
         player_b = next_player(player_a)
         board = empty_board()
         moves = [5,5,4,6,4,4,3,1,3,2,3]
         if player_a == 1:
+            # player X first
             moves.insert(0,0)
         make_moves(board,1,moves)
-        print_board(board)
         computer_move(board,player_a)
         winner = find_winner(board)
         if winner != player_a:
