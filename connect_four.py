@@ -15,7 +15,7 @@ debug = 0
 
 # max look ahead depth
 # depth 7 doesn't play a perfect game, but plays strongly and isn't overly slow
-max_depth = 7
+max_depth = 5
 
 # make a unique key for a given board condition
 def board_key(board):
@@ -23,7 +23,8 @@ def board_key(board):
 
 def print_board(board):
     for (i,row) in reversed(list(enumerate(board))):
-        print("row", i, ":",end="")
+        print("       ",end="")
+        # print("row", i, ":",end="")
         for val in row:
             print(" ",player_tokens[val]," ",end="",sep="")
         print("")
@@ -151,9 +152,11 @@ def move_score(board,player,move,alpha,beta,depth):
     return s
 
 #
-# Make best move, return the move location
+# Computer move.
+#  Use Alpha-Beta to calculate the best move.
+#  return the move location
 #
-def best_move(board,player):
+def computer_move(board,player):
     if board[0][3] == 0:
         # special case for best first move
         make_move(board,player,3)
@@ -167,6 +170,7 @@ def best_move(board,player):
         make_move(board,player,best_move)
         return best_move
 
+    # No more legal moves, debug
     print_board(board)
     assert False, print('no more legal moves')
 
@@ -196,22 +200,6 @@ def better_than_random_move(board,player):
         random_move(board,player)
         return
     assert False, print('no more legal moves')    
-
-# test if a given coordinate is in bounds of the board. Not used.
-def in_bounds(row,col):
-    """
-    >>> in_bounds(0,0)
-    True
-    >>> in_bounds(5,6)
-    True
-    >>> in_bounds(-1,0)
-    False
-    >>> in_bounds(6,6)
-    False
-    >>> in_bounds(5,7)
-    False
-    """
-    return row >= 0 and row < 6 and col >= 0 and col < 7
 
 # find_winner()
 #   - given a board, if a player has won, return the player id (1 or 2)
@@ -374,40 +362,16 @@ def estimated_score(board):
 
     return score
 
-# play a random game
-while False:
-    random_move(board,1)
-    print_board(board)
-    winner = find_winner(board)
-    if winner != 0:
-        print("the winner is player {0}".format(player_tokens[winner]))
-        break
-    random_move(board,2)
-    print_board(board)
-    winner = find_winner(board)
-    if winner != 0:
-        print("the winner is player {0}".format(player_tokens[winner]))
-        break
-
-# play random vs. better than random
-count = 0
-while False:
-    player = (count % 2) + 1
-    better_than_random_move(board,player)
-    print_board(board)
-    winner = find_winner(board)
-    if winner != 0:
-        print("the winner is player {0}".format(player_tokens[winner]))
-        break
-    count = count + 1
-
+#
+# Play a Computer vs. Computer match
+#
 def computer_vs_computer():
     # play Computer vs Computer
     player = 1
     board = empty_board()
     moves = 0
     while True:
-        best_move(board,player)
+        computer_move(board,player)
         moves += 1
         print_board(board)
         winner = find_winner(board)
@@ -419,6 +383,9 @@ def computer_vs_computer():
             print("TIE!")
             break
 
+#
+# As a human for a move
+#
 def get_human_move(board):
     move = -1
     legal = legal_moves(board)
@@ -428,8 +395,10 @@ def get_human_move(board):
             print('Ooops, that move is not valid. Your legal moves are: {0}'.format(legal))
     return move
 
+#
+# Play Human vs Computers
+#
 def human_vs_computer(human):
-    # play Human vs Computer
     board = empty_board()
     moves = 0
     player = 1
@@ -445,7 +414,7 @@ def human_vs_computer(human):
             move = get_human_move(board)
             make_move(board,player,move)
         else:
-            move = best_move(board,player)
+            move = computer_move(board,player)
             print('I place my {0} in column {1}'.format(player_tokens[player],move))
         moves += 1
         print_board(board)
@@ -459,6 +428,9 @@ def human_vs_computer(human):
             break
             
 
+#
+# Run tests
+#
 def tests():
     '''
     >>> tests() # doctest:+ELLIPSIS
@@ -536,7 +508,7 @@ def tests():
         make_move(board,player_a,6)
         make_move(board,player_a,5)
         make_move(board,player_a,4)
-        best_move(board,player_a)
+        computer_move(board,player_a)
         winner = find_winner(board)
         if board[0][2] != player_a:
             print_board(board)
@@ -549,16 +521,12 @@ def tests():
     for player_a in [1,2]:
         player_b = next_player(player_a)
         board = empty_board()
-        make_move(board,player_b,5)
-        make_move(board,player_b,4)
-        make_move(board,player_b,4)
-        make_move(board,player_b,3)
-        make_move(board,player_b,3)
-        make_move(board,player_b,3)
-        make_move(board,player_a,6)
-        make_move(board,player_a,5)
-        make_move(board,player_a,4)
-        best_move(board,player_a)
+        moves = [5,5,4,6,4,4,3,1,3,2,3]
+        if player_a == 1:
+            moves.insert(0,0)
+        make_moves(board,1,moves)
+        print_board(board)
+        computer_move(board,player_a)
         winner = find_winner(board)
         if winner != player_a:
             print_board(board)
@@ -580,7 +548,7 @@ def tests():
     board = empty_board()
     moves = [3,4,1,4,4,2,2,2,2,3,6,3,3,6,4,6,4]
     make_moves(board,1,moves)
-    best_move(board,2)
+    computer_move(board,2)
     if board[5][4] != 2:
         print_board(board)
         print('FAIL: O did not block winning move')
