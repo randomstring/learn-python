@@ -74,7 +74,8 @@ def backtrack(board,column):
 # legal_moves(): return a list of all legal moves
 #
 def legal_moves(board):
-    return [col for col in range(7) if board[5][col] == 0]
+    # Simple hack to try center moves first
+    return [col for col in [3, 2, 4, 1, 5, 0, 6] if board[5][col] == 0]
 
 # Constants used for alpha beta limits
 neg_inf = -10000
@@ -139,9 +140,6 @@ def score(board,player,alpha,beta,depth):
 def estimated_move_score(board,player,move):
     make_move(board,player,move)
     s = estimated_score(board)
-    if debug:
-        print_board(board)
-        print('estimated score: {0}'.format(s))
     backtrack(board,move)
     return s
 
@@ -165,8 +163,10 @@ def computer_move(board,player):
     if best_move == -1:
         print("No move possible, or game over")
     else:
-        if debug:
-            print('best_move: player {0} is {1} score {2}'.format(player,best_move,s))
+        if s < -0.9:
+            print('HA! I\'ve got you now!')
+        elif s > 0.9:
+            print('Uh-Oh. I\'m in trouble now.')
         make_move(board,player,best_move)
         return best_move
 
