@@ -70,6 +70,13 @@ def most_constrained(board):
                 constrained[row][col] = len(possible_values(board,row,col))
     return constrained
 
+# check if puzzle is solvable
+def is_solvable(game):
+    # XXX - todo
+    # need to look for duplicates in row/col/quadrant
+    # similar to possible_values, but need to find duplicates
+    pass
+
 # Given a game board and a row, col determine all the legal values
 # that can fill in that square. Used to create a list of values to try
 # for that square.
