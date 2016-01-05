@@ -4,6 +4,7 @@
 #
 import time
 
+# print the sudoku game: board, salved state, elapsed time to solve
 def print_game(game):
     print_board(game["board"])
     if (game["solved"] == True):
@@ -12,6 +13,7 @@ def print_game(game):
     else:
         print("filled in so far:", game["filled"])
 
+# print the sudoku board
 def print_board(board):
     for (i,row) in enumerate(board):
         print("row", (i+1), ":",end="")
@@ -22,6 +24,7 @@ def print_board(board):
                 print(" ",val," ",end="",sep="")
         print("")
 
+# create new game board
 def empty_board(size): return [ [ 0 for i in range(size)] for i in range(size)]
 
 def make_moves(game, moves):
@@ -74,7 +77,7 @@ def possible_values(board,row,col):
     used_row = set([board[row][i] for i in range(9) if board[row][i] != 0])
     used_col = set([board[i][col] for i in range(9) if board[i][col] != 0])
     used_quad = set([board[r][c] for r,c in quadrant_coordinates(row,col) if board[r][c] != 0])
-    used = used_row | used_col  | used_quad
+    used = used_row | used_col | used_quad
     values = set( i for i in range(1,10) if i not in used )
     return values
 
