@@ -18,12 +18,10 @@ group.add_argument('-f', metavar='filename', help='filename containing puzzle st
 args = parser.parse_args()
 
 # load game
-puzzle_string = args.puzzle
+puzzle_string = args.p
 print(puzzle_string)
 
-game = sudoku.new_game()
-moves = sudoku.move_list_from_strings([puzzle_string])
-sudoku.make_moves(game,moves)
+game = sudoku.new_game(puzzle_string)
                   
 # solve
 sudoku.solve(game)

@@ -28,8 +28,11 @@ def print_board(board):
 def empty_board(size): return [ [ 0 for i in range(size)] for i in range(size)]
 
 # create new game data structure
-def new_game():
-    return {"filled": 0, "board": empty_board(9), "solved": False, "tries": 0 }
+def new_game(puzzle=None):
+    game = {"filled": 0, "board": empty_board(9), "solved": False, "tries": 0 }
+    if puzzle:
+        make_moves(game,move_list_from_strings([puzzle]))
+    return game
 
 def make_moves(game, moves):
     # make a list of moves
