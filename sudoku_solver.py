@@ -10,16 +10,18 @@ parser = argparse.ArgumentParser(description='Solve a Sudoku puzzle.',
 Example puzzle format:
 .....6....59.....82....8....45........3........6..3.54...325..6..................
 '''
-                                 )
+)
+group = parser.add_mutually_exclusive_group()
+group.add_argument('-p', metavar='puzzle', help='sudoku puzzle string')
+group.add_argument('-f', metavar='filename', help='filename containing puzzle string(s)')
 
-parser.add_argument('puzzle', metavar='P', help='sudoku puzzle string')
 args = parser.parse_args()
 
-game = sudoku.new_game()
 # load game
 puzzle_string = args.puzzle
 print(puzzle_string)
 
+game = sudoku.new_game()
 moves = sudoku.move_list_from_strings([puzzle_string])
 sudoku.make_moves(game,moves)
                   
