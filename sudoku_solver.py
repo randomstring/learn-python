@@ -31,16 +31,15 @@ if args.p != None:
     puzzles.append(args.p)
 else:
     # read in a list of puzzles from a file or default to standard in
-    filename = args.f
-    if filename is None:
+    input = args.f
+    if input is None:
         if args.verbose:
             print('Reading puzzle(s) from stdin.');
-        filename = sys.stdin
+        input = sys.stdin
     else:
-        print('Reading puzzles from file [{0}]'.format(filename.name))
-    
-
-
+        print('Reading puzzles from file [{0}]'.format(input.name))
+    for puzzle in input:
+        puzzles.append(puzzle.rstrip())
 
 for puzzle in puzzles:
     count += 1
