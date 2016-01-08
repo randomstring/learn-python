@@ -31,7 +31,7 @@ def empty_board(size): return [ [ 0 for i in range(size)] for i in range(size)]
 def new_game(puzzle=None):
     game = {"filled": 0, "board": empty_board(9), "solved": False, "tries": 0 }
     if puzzle:
-        make_moves(game,move_list_from_strings([puzzle]))
+        set_puzzle(game,puzzle)
     return game
 
 def make_moves(game, moves):
@@ -40,7 +40,7 @@ def make_moves(game, moves):
     for move in moves:
         [x, y, val] = move
         if game["board"][x][y] == 0:
-            game["filled"] = game["filled"] + 1
+            game["filled"] += 1
         else:
             print("making a move on a coordinate that is already filled in:", x, y, val)
         game["board"][x][y] = val
@@ -136,6 +136,15 @@ def solve(game):
     if game["solved"] == True and "end_time" not in game:
         game["end_time"] = time.time()
     return game["board"]
+
+# Set board directly from puzzle string, bypass make_moves()
+def set_puzzle(game,puzzle_string):
+    for i,val in enumerate(puzzle_string):
+        if val == '.':
+            val = 0
+        else:
+            game["filled"] += 1
+        game["board"][int(i / 9)][i % 9] = int(val)
 
 # Generate a list of moves given either 1) an array of row strings or
 # 2) one long string with all the filled in squares
