@@ -13,6 +13,7 @@ Example puzzle format:
 .....6....59.....82....8....45........3........6..3.54...325..6..................
 '''
 )
+
 group = parser.add_mutually_exclusive_group()
 group.add_argument('-p', metavar='puzzle', help='sudoku puzzle string')
 group.add_argument('-f', metavar='filename',
@@ -45,13 +46,8 @@ for puzzle in puzzles:
     count += 1
     if args.verbose:
         print(puzzle)
-
     game = sudoku.new_game(puzzle)
-        
-    # solve
     sudoku.solve(game)
-
-    # print result
     sudoku.print_game(game)
 
 elapsed = time.time() - start_time
