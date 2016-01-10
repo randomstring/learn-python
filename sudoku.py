@@ -4,6 +4,14 @@
 #
 import time
 
+# return elapsed time for solving puzzle
+def elapsed(game):
+    if not game["start_time"]:
+        return 0
+    if game["end_time"]:
+        return game["end_time"] - game["start_time"]
+    return time.time() - game["start_time"]
+
 # print the sudoku game: board, salved state, elapsed time to solve
 def print_game(game):
     print_board(game["board"])
@@ -23,6 +31,16 @@ def print_board(board):
             else:
                 print(" ",val," ",end="",sep="")
         print("")
+
+# return the current puzzle state as a string
+def puzzle_string(game):
+    puzzle = ""
+    for (i,row) in enumerate(game["board"]):
+        for val in row:
+            if val == 0:
+                val = "."
+            puzzle += str(val)
+    return puzzle
 
 # create new game board
 def empty_board(size): return [ [ 0 for i in range(size)] for i in range(size)]

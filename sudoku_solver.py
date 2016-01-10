@@ -27,6 +27,7 @@ start_time = time.time()
 count = 0
 
 # Todo: generate histogram for benchmarked completion times
+hist = {}
 
 # load game
 puzzles = []
@@ -39,7 +40,7 @@ else:
         if args.verbose:
             print('Reading puzzle(s) from stdin.');
         input = sys.stdin
-    else:
+    elif args.verbose:
         print('Reading puzzles from file [{0}]'.format(input.name))
     for puzzle in input:
         puzzles.append(puzzle.rstrip())
@@ -50,7 +51,10 @@ for puzzle in puzzles:
         print(puzzle)
     game = sudoku.new_game(puzzle)
     sudoku.solve(game)
-    sudoku.print_game(game)
+    if args.benchmark:
+        print(sudoku.puzzle_string(game),"{:7.3f}".format(sudoku.elapsed(game)))
+    else:
+        sudoku.print_game(game)
 
 elapsed = time.time() - start_time
 if args.verbose or args.benchmark:
