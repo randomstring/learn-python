@@ -26,6 +26,8 @@ args = parser.parse_args()
 start_time = time.time()
 count = 0
 
+# Todo: generate histogram for benchmarked completion times
+
 # load game
 puzzles = []
 if args.p != None:
