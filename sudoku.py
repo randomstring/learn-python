@@ -61,6 +61,8 @@ def make_moves(game, moves):
         else:
             print("making a move on a coordinate that is already filled in:", x, y, val)
         game["board"][x][y] = val
+        # update possible map
+        # update constrained map
     if game["filled"] == 81:
         game["solved"] = True
 
@@ -74,6 +76,8 @@ def backtrack(game, moves):
         else:
             print("backtracking on an empty coordinate:", x, y)
         game["board"][x][y] = 0
+        # update possible map
+        # update constrained map
     if game["filled"] < 0:
         print("oh no, we have negative moves")
 
@@ -117,8 +121,13 @@ def possible_values(board,row,col):
     values = set( i for i in range(1,10) if i not in used )
     return values
 
+def gen_possible_board(game):
+    return [ [ possible_values(game["board"],row,col) for col in range(9)] for row in range(9)]
+
 def possible_values_fast(game,row,col):
-    pass
+    if not game["possible"]:
+        game["possible"] = gen_possible_board(game)
+    return game["possible"][row][col]
 
 # return the list of coordinates for the quadrant that the given row,
 # col square is located.
