@@ -20,8 +20,13 @@ group.add_argument('-f', metavar='filename',
                    type=argparse.FileType('r'),
                    help='filename containing puzzle string(s)')
 parser.add_argument('-b','--benchmark', action='store_true', help='time total amount of time for all puzzles')
+parser.add_argument('-t','--test', action='store_true', help='run regression tests')
 parser.add_argument('-v','--verbose', action='store_true', help='more verbose output')
 args = parser.parse_args()
+
+if args.test:
+    sudoku.test()
+    quit()
 
 start_time = time.time()
 count = 0
