@@ -4,6 +4,18 @@
 #
 import time
 
+# create new game board
+def empty_board(size): return [ [ 0 for i in range(size)] for i in range(size)]
+
+# create new game data structure
+def new_game(puzzle=None):
+    game = {"filled": 0, "board": empty_board(9), "solved": False, "tries": 0 }
+    if puzzle:
+        set_puzzle(game,puzzle)
+    game["possible"] =  gen_possible(game)
+    game["constrained"] =  gen_constrained(game)
+    return game
+
 # return elapsed time for solving puzzle
 def elapsed(game):
     if not game["start_time"]:
@@ -41,16 +53,6 @@ def puzzle_entry(x):
 def puzzle_string(game):
     return ''.join([''.join([puzzle_entry(x) for x in row]) for row in game["board"]])
 
-# create new game board
-def empty_board(size): return [ [ 0 for i in range(size)] for i in range(size)]
-
-# create new game data structure
-def new_game(puzzle=None):
-    game = {"filled": 0, "board": empty_board(9), "solved": False, "tries": 0 }
-    if puzzle:
-        set_puzzle(game,puzzle)
-    return game
-
 def make_moves(game, moves):
     # make a list of moves
     # moves is a list [ x, y, value ]
@@ -61,8 +63,7 @@ def make_moves(game, moves):
         else:
             print("making a move on a coordinate that is already filled in:", x, y, val)
         game["board"][x][y] = val
-        # update possible map
-        # update constrained map
+        update_possible_board(game,x,y,val)
     if game["filled"] == 81:
         game["solved"] = True
 
@@ -70,14 +71,13 @@ def backtrack(game, moves):
     # undo a list of moves
     # moves is a list [ x, y, value ]
     for move in moves:
-        [x, y] = move
+        [x, y, val] = move
         if game["board"][x][y] != 0:
             game["filled"] = game["filled"] - 1
         else:
             print("backtracking on an empty coordinate:", x, y)
         game["board"][x][y] = 0
-        # update possible map
-        # update constrained map
+        update_possible_board(game,x,y,val)
     if game["filled"] < 0:
         print("oh no, we have negative moves")
 
@@ -91,7 +91,7 @@ def most_constrained(board):
             if (board[row][col] != 0):
                 constrained[row][col] = 0
             else:
-                constrained[row][col] = len(possible_values(board,row,col))
+                constrained[row][col] = len(possible_values_fast(board,row,col))
     return constrained
 
 def most_constrained_fast(game):
@@ -121,12 +121,37 @@ def possible_values(board,row,col):
     values = set( i for i in range(1,10) if i not in used )
     return values
 
-def gen_possible_board(game):
+# update the possible move board given a move, or move backtrack
+def update_possible_board(game,row,col,val):
+    possible = game["possible"]
+    constrained = game["constrained"]
+    for r in range(9):
+        possible[r][col] ^= set([val])
+        constrained[r][col] = len(possible[r][col])
+    for c in [x for x in range(9) if x != col]:
+        possible[row][c] ^= set([val])
+        constrained[row][c] = len(possible[row][c])
+    for r,c in [(r,c) for (r,c) in quadrant_coordinates(row,col) if r != row and c != col]:
+        possible[r][c] ^= set([val])
+        constrained[r][c] = len(possible[r][c])
+    # game["possible"] = possible
+    # game["constrained"] = constrained
+
+def new_possible_board(game):
+    return [ [ set(range(9)) for col in range(9)] for row in range(9)]
+
+def new_constraint_board(game):
+    return [ [ 9 for col in range(9)] for row in range(9)]
+
+def gen_possible(game):
     return [ [ possible_values(game["board"],row,col) for col in range(9)] for row in range(9)]
 
+def gen_constrained(game):
+    return [ [ len(game["possible"][row][col]) for col in range(9)] for row in range(9)]
+
 def possible_values_fast(game,row,col):
-    if not game["possible"]:
-        game["possible"] = gen_possible_board(game)
+    if "possible" not in game:
+        game["possible"] = gen_possible(game)
     return game["possible"][row][col]
 
 # return the list of coordinates for the quadrant that the given row,
@@ -150,7 +175,7 @@ def most_constrained_move(game):
             if constrained[row][col] != 0 and constrained[row][col] < min:
                 min = constrained[row][col]
                 coords = [row, col]
-    return [ coords, possible_values(game["board"], coords[0], coords[1])]
+    return [ coords, possible_values_fast(game["board"], coords[0], coords[1])]
 
 def solve(game):
     # 1. pick most constrained coordinate and try all legal values
