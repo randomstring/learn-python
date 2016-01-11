@@ -33,14 +33,13 @@ def print_board(board):
         print("")
 
 # return the current puzzle state as a string
+def puzzle_entry(x):
+    if x == 0:
+        return '.'
+    return str(x)
+
 def puzzle_string(game):
-    puzzle = ""
-    for (i,row) in enumerate(game["board"]):
-        for val in row:
-            if val == 0:
-                val = "."
-            puzzle += str(val)
-    return puzzle
+    return ''.join([''.join([puzzle_entry(x) for x in row]) for row in game["board"]])
 
 # create new game board
 def empty_board(size): return [ [ 0 for i in range(size)] for i in range(size)]
@@ -91,6 +90,11 @@ def most_constrained(board):
                 constrained[row][col] = len(possible_values(board,row,col))
     return constrained
 
+def most_constrained_fast(game):
+    if not game["constrained"]:
+        game["constrained"] = most_constrained(game["board"])
+    return game["constrained"]
+
 # check if puzzle is solvable
 def is_solvable(game):
     # XXX - todo
@@ -112,6 +116,9 @@ def possible_values(board,row,col):
     used = used_row | used_col | used_quad
     values = set( i for i in range(1,10) if i not in used )
     return values
+
+def possible_values_fast(game,row,col):
+    pass
 
 # return the list of coordinates for the quadrant that the given row,
 # col square is located.
