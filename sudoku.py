@@ -14,10 +14,9 @@ def new_game(puzzle=None):
     game["possible"] =  new_possible_board(game)
     game["constrained"] =  new_constrained_board(game)
     if puzzle:
-        #set_puzzle(game,puzzle)
         make_moves(game,move_list_from_strings([puzzle]))
-    print_game(game)
-    print_possible(game)
+    #print_game(game)
+    #print_possible(game)
     # print_board(game["constrained"])
     return game
 
@@ -156,21 +155,21 @@ def update_possible_board(game,row,col,val,is_backtrack):
     constrained = game["constrained"]
     for r in range(9):
         if is_backtrack:
-            possible[r][col] += set([val])
+            possible[r][col].add(val)
         else:
-            possible[r][col] -= set([val])
+            possible[r][col].discard(val)
         constrained[r][col] = len(possible[r][col])
     for c in [x for x in range(9) if x != col]:
         if is_backtrack:
-            possible[row][c] += set([val])
+            possible[row][c].add(val)
         else:
-            possible[row][c] -= set([val])
+            possible[row][c].discard(val)
         constrained[row][c] = len(possible[row][c])
     for r,c in [(r,c) for (r,c) in quadrant_coordinates(row,col) if r != row and c != col]:
         if is_backtrack:
-            possible[r][c] += set([val])
+            possible[r][c].add(val)
         else:
-            possible[r][c] -= set([val])
+            possible[r][c].discard(val)
         constrained[r][c] = len(possible[r][c])
     # game["possible"] = possible
     # game["constrained"] = constrained
@@ -228,7 +227,7 @@ def solve(game):
         solve(game)
         if (game["solved"] == True):
             break
-        backtrack(game,[[coords[0], coords[1]]])
+        backtrack(game,[[coords[0], coords[1], val]])
     if game["solved"] == True and "end_time" not in game:
         game["end_time"] = time.time()
     return game["board"]
@@ -261,10 +260,12 @@ def move_list_from_strings(lines):
 
 def test():
     passed = True
+    test = 1
 
     # From The Algorithm Design Manual 2nd Edition (S. S. Skiena) Page 239
     # this is a "hard" problem
     game = new_game()
+    # .......12....35......6...7.7.....3.....4..8..1...........12.....8.....4..5....6..
     make_moves(game,[[0,7,1],[0,8,2],[1,4,3],[1,5,5],[2,3,6],[2,7,7],[3,0,7],[3,6,3],[4,3,4],[4,6,8],[5,0,1],[6,3,1],[6,4,2],[7,1,8],[7,7,4],[8,1,5],[8,6,6]])
     solution = solve(game)
 
@@ -279,31 +280,36 @@ def test():
                     [2, 8, 7, 3, 5, 6, 1, 4, 9],
                     [3, 5, 1, 9, 4, 7, 6, 2, 8]]:
         passed = False
-        print("FAILED: test 1")
+        print("FAILED: test",test)
     else:
-        print("PASSED: test 1")
+        print("PASSED: test",test)
 
     # Easy problem from American Airlines inflight Magazine
+    test += 1
     game = new_game()
+    #'..7.6....8.3...14292.8..5...5.2..9.42..584..13.4..1.2...5..6.18732...6.9....2.4..'
     make_moves(game,[[0,2,7],[0,4,6],[1,0,8],[1,2,3],[1,6,1],[1,7,4],[1,8,2],[2,0,9],[2,1,2],[2,3,8],[2,6,5],[3,1,5],[3,3,2],[3,6,9],[3,8,4],[4,0,2],[4,3,5],[4,4,8],[4,5,4],[4,8,1],[5,0,3],[5,2,4],[5,5,1],[5,7,2],[6,2,5],[6,5,6],[6,7,1],[6,8,8],[7,0,7],[7,1,3],[7,2,2],[7,6,6],[7,8,9],[8,4,2],[8,6,4]])
     solution = solve(game)
     if game["solved"] == True:
-        print("PASSED: test 2")
+        print("PASSED: test",test)
     else:
-        print("FAILED: test 2")
+        print("FAILED: test",test)
         passed = False
 
     # medium problem from American Airlines inflight Magazine
+    test += 1
     game = new_game()
+    #'..53..1.493.5..2.......6.5..5..28..1.94...82.8..61..7..6.1.......2..5.185.9..26..'
     make_moves(game,[[0,2,5],[0,3,3],[0,6,1],[0,8,4],[1,0,9],[1,1,3],[1,3,5],[1,6,2],[2,5,6],[2,7,5],[3,1,5],[3,4,2],[3,5,8],[3,8,1],[4,1,9],[4,2,4],[4,6,8],[4,7,2],[5,0,8],[5,3,6],[5,4,1],[5,7,7],[6,1,6],[6,3,1],[7,2,2],[7,5,5],[7,7,1],[7,8,8],[8,0,5],[8,2,9],[8,5,2],[8,6,6]])
     solution = solve(game)
     if game["solved"] == True:
-        print("PASSED: test 3")
+        print("PASSED: test",test)
     else:
-        print("FAILED: test 3")
+        print("FAILED: test",test)
         passed = False
 
     # hard problem from American Airlines inflight Magazine
+    test += 1
     game = new_game()
     problem4 = ["3 7 . 4 . . 1 . .",
                 ". . . . . . . 2 .",
@@ -317,20 +323,42 @@ def test():
     make_moves(game,move_list_from_strings(problem4))
     solution = solve(game)
     if game["solved"] == True:
-        print("PASSED: test 4")
+        print("PASSED: test",test)
     else:
-        print("FAILED: test 4")
+        print("FAILED: test",test)
         passed = False
 
     # Norvig's hardest sudoku problem http://norvig.com/sudoku.html  (takes 0.09 s)
+    test += 1
     game = new_game()
     make_moves(game,move_list_from_strings(['.....6....59.....82....8....45........3........6..3.54...325..6..................']))
     solution = solve(game)
     if game["solved"] == True:
-        print("PASSED: test 5")
+        print("PASSED: test",test)
     else:
-        print("FAILED: test 5")
+        print("FAILED: test",test)
         passed = False
+    
+    puzzles = [
+        '4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......',
+        '52...6.........7.13...........4..8..6......5...........418.........3..2...87.....',
+        '6.....8.3.4.7.................5.4.7.3..2.....1.6.......2.....5.....8.6......1....',
+        ]
+    solutions = [
+        '417369825632158947958724316825437169791586432346912758289643571573291684164875293',
+        '527316489896542731314987562172453896689271354453698217941825673765134928238769145',
+        '617459823248736915539128467982564371374291586156873294823647159791385642465912738',
+        ]
+
+    for (p,s) in zip(puzzles,solutions):
+        test += 1
+        game = new_game(p)
+        solution = solve(game)
+        if puzzle_string(game) == s:
+            print("PASSED: test",test)
+        else:
+            print("FAILED: test",test)
+            passed = False
 
     return passed
 
