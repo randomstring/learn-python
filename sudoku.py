@@ -15,8 +15,8 @@ def new_game(puzzle=None):
     game["constrained"] = new_constrained_board(game)
     if puzzle:
         make_moves(game,move_list_from_strings([puzzle]))
-    #print_game(game)
-    #print_possible(game)
+    # print_game(game)
+    # print_possible(game)
     # print_board(game["constrained"])
     return game
 
@@ -102,7 +102,6 @@ def make_moves(game, moves):
         game["board"][x][y] = val
         update_possible_board(game,x,y,val,False)
     if game["filled"] == 81:
-        print('Solved It!')
         game["solved"] = True
 
 def backtrack(game, moves):
@@ -161,17 +160,16 @@ def update_possible_board(game,row,col,val,is_backtrack):
     constrained = game["constrained"]
     for r in range(9):
         if is_backtrack:
-            possible[r][col].add(val)
+            possible[r][col] = possible_values(board,r,col)
         else:
             possible[r][col].discard(val)
-        # XXX only if board is not set
         if board[r][col] == 0:
             constrained[r][col] = len(possible[r][col])
         else:
             constrained[r][col] = 0
     for c in [x for x in range(9) if x != col]:
         if is_backtrack:
-            possible[row][c].add(val)
+            possible[row][c] = possible_values(board,row,c)
         else:
             possible[row][c].discard(val)
         if board[row][c] == 0:
@@ -180,7 +178,7 @@ def update_possible_board(game,row,col,val,is_backtrack):
             constrained[row][c] = 0
     for r,c in [(r,c) for (r,c) in quadrant_coordinates(row,col) if r != row and c != col]:
         if is_backtrack:
-            possible[r][c].add(val)
+            possible[r][c] = possible_values(board,r,c)
         else:
             possible[r][c].discard(val)
         if board[r][c] == 0:
@@ -222,7 +220,7 @@ def most_constrained_move(game):
         for col in range(9):
             if constrained[row][col] == 0 and game["board"][row][col] == 0:
                 # dead end, we have a coordinate with no valid values
-                print("DEAD END. Backtracking")
+                # print("DEAD END. Backtracking")
                 return [ [9,9], set() ]
             #if constrained[row][col] != 0 and constrained[row][col] < min:
             if constrained[row][col] != 0 and constrained[row][col] < min and game["board"][row][col] == 0:
@@ -238,18 +236,18 @@ def solve(game):
     if game["solved"] == True:
         return
     [coords, possible_values] = most_constrained_move(game)
-    print('Next Moves:',coords,'possible values:',possible_values)
+    # print('Next Moves:',coords,'possible values:',possible_values)
     for val in list(possible_values):
-        print('making move:',coords,'val:',val)
+        # print('making move:',coords,'val:',val)
         make_moves(game,[[coords[0], coords[1], val]])
         game["tries"] += 1
-        debug_game(game)
+        # debug_game(game)
         solve(game)
         if (game["solved"] == True):
             break
         backtrack(game,[[coords[0], coords[1], val]])
-        print('backtracking:',coords,'val:',val)
-        debug_game(game)
+        # print('backtracking:',coords,'val:',val)
+        # debug_game(game)
     if game["solved"] == True and "end_time" not in game:
         game["end_time"] = time.time()
 
@@ -282,91 +280,29 @@ def move_list_from_strings(lines):
 def test():
     passed = True
     test = 1
-
-    # From The Algorithm Design Manual 2nd Edition (S. S. Skiena) Page 239
-    # this is a "hard" problem
-    game = new_game()
-    # .......12....35......6...7.7.....3.....4..8..1...........12.....8.....4..5....6..
-    make_moves(game,[[0,7,1],[0,8,2],[1,4,3],[1,5,5],[2,3,6],[2,7,7],[3,0,7],[3,6,3],[4,3,4],[4,6,8],[5,0,1],[6,3,1],[6,4,2],[7,1,8],[7,7,4],[8,1,5],[8,6,6]])
-    solve(game)
-    solution = game["board"]
-
-    # solution for reference
-    if solution != [[6, 7, 3, 8, 9, 4, 5, 1, 2], 
-                    [9, 1, 2, 7, 3, 5, 4, 8, 6],
-                    [8, 4, 5, 6, 1, 2, 9, 7, 3],
-                    [7, 9, 8, 2, 6, 1, 3, 5, 4],
-                    [5, 2, 6, 4, 7, 3, 8, 9, 1],
-                    [1, 3, 4, 5, 8, 9, 2, 6, 7],
-                    [4, 6, 9, 1, 2, 8, 7, 3, 5],
-                    [2, 8, 7, 3, 5, 6, 1, 4, 9],
-                    [3, 5, 1, 9, 4, 7, 6, 2, 8]]:
-        passed = False
-        print("FAILED: test",test)
-    else:
-        print("PASSED: test",test)
-
-    # Easy problem from American Airlines inflight Magazine
-    test += 1
-    game = new_game()
-    #'..7.6....8.3...14292.8..5...5.2..9.42..584..13.4..1.2...5..6.18732...6.9....2.4..'
-    make_moves(game,[[0,2,7],[0,4,6],[1,0,8],[1,2,3],[1,6,1],[1,7,4],[1,8,2],[2,0,9],[2,1,2],[2,3,8],[2,6,5],[3,1,5],[3,3,2],[3,6,9],[3,8,4],[4,0,2],[4,3,5],[4,4,8],[4,5,4],[4,8,1],[5,0,3],[5,2,4],[5,5,1],[5,7,2],[6,2,5],[6,5,6],[6,7,1],[6,8,8],[7,0,7],[7,1,3],[7,2,2],[7,6,6],[7,8,9],[8,4,2],[8,6,4]])
-    solution = solve(game)
-    if game["solved"] == True:
-        print("PASSED: test",test)
-    else:
-        print("FAILED: test",test)
-        passed = False
-
-    # medium problem from American Airlines inflight Magazine
-    test += 1
-    game = new_game()
-    #'..53..1.493.5..2.......6.5..5..28..1.94...82.8..61..7..6.1.......2..5.185.9..26..'
-    make_moves(game,[[0,2,5],[0,3,3],[0,6,1],[0,8,4],[1,0,9],[1,1,3],[1,3,5],[1,6,2],[2,5,6],[2,7,5],[3,1,5],[3,4,2],[3,5,8],[3,8,1],[4,1,9],[4,2,4],[4,6,8],[4,7,2],[5,0,8],[5,3,6],[5,4,1],[5,7,7],[6,1,6],[6,3,1],[7,2,2],[7,5,5],[7,7,1],[7,8,8],[8,0,5],[8,2,9],[8,5,2],[8,6,6]])
-    solution = solve(game)
-    if game["solved"] == True:
-        print("PASSED: test",test)
-    else:
-        print("FAILED: test",test)
-        passed = False
-
-    # hard problem from American Airlines inflight Magazine
-    test += 1
-    game = new_game()
-    problem4 = ["3 7 . 4 . . 1 . .",
-                ". . . . . . . 2 .",
-                ". . . 2 . 1 . 5 3",
-                ". . . . . 9 6 1 4",
-                "4 . . . 2 . . . 7",
-                "7 6 9 3 . . . . .",
-                "9 2 . 1 . 6 . . .",
-                ". 1 . . . . . . .",
-                ". . 8 . . 2 . 9 1"]
-    make_moves(game,move_list_from_strings(problem4))
-    solution = solve(game)
-    if game["solved"] == True:
-        print("PASSED: test",test)
-    else:
-        print("FAILED: test",test)
-        passed = False
-
-    # Norvig's hardest sudoku problem http://norvig.com/sudoku.html  (takes 0.09 s)
-    test += 1
-    game = new_game()
-    make_moves(game,move_list_from_strings(['.....6....59.....82....8....45........3........6..3.54...325..6..................']))
-    solution = solve(game)
-    if game["solved"] == True:
-        print("PASSED: test",test)
-    else:
-        print("FAILED: test",test)
-        passed = False
-    
     puzzles = [
+        # From The Algorithm Design Manual 2nd Edition (S. S. Skiena) Page 239
+        '.......12....35......6...7.7.....3.....4..8..1...........12.....8.....4..5....6..',
+        # Easy problem from American Airlines inflight Magazine
+        '..7.6....8.3...14292.8..5...5.2..9.42..584..13.4..1.2...5..6.18732...6.9....2.4..',
+        # medium problem from American Airlines inflight Magazine
+        '..53..1.493.5..2.......6.5..5..28..1.94...82.8..61..7..6.1.......2..5.185.9..26..',
+        # hard problem from American Airlines inflight Magazine
+        '37.4..1.........2....2.1.53.....96144...2...77693.....92.1.6....1.........8..2.91',
+        # Norvig's hardest sudoku problem http://norvig.com/sudoku.html  (takes 0.09 s)
+        #'.....6....59.....82....8....45........3........6..3.54...325..6..................', #orig
+        '.....6....59.....82....8....45........3........6..3.54...325..6..............1283', # make it easier
+        # from top95.txt
         '4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......',
         '52...6.........7.13...........4..8..6......5...........418.........3..2...87.....',
         '6.....8.3.4.7.................5.4.7.3..2.....1.6.......2.....5.....8.6......1....',
         ]
     solutions = [
+        '673894512912735486845612973798261354526473891134589267469128735287356149351947628',
+        '547162893863759142921843576156237984279584361384691725495376218732418659618925437',
+        '285397164936541287471286359657428931194753826823619475768134592342965718519872643',
+        '372458169156937428894261753235789614481625937769314582923146875517893246648572391',
+        '834296715659174328271538469945862137183457692726913854418325976362789541597641283',
         '417369825632158947958724316825437169791586432346912758289643571573291684164875293',
         '527316489896542731314987562172453896689271354453698217941825673765134928238769145',
         '617459823248736915539128467982564371374291586156873294823647159791385642465912738',
