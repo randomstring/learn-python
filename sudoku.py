@@ -11,8 +11,8 @@ def empty_board(size): return [ [ 0 for i in range(size)] for i in range(size)]
 def new_game(puzzle=None):
     game = {"filled": 0, "board": empty_board(9), "solved": False, "tries": 0 }
     # init possible and constrained
-    game["possible"] =  new_possible_board(game)
-    game["constrained"] =  new_constrained_board(game)
+    game["possible"] = new_possible_board(game)
+    game["constrained"] = new_constrained_board(game)
     if puzzle:
         make_moves(game,move_list_from_strings([puzzle]))
     #print_game(game)
@@ -28,6 +28,11 @@ def elapsed(game):
         return game["end_time"] - game["start_time"]
     return time.time() - game["start_time"]
 
+def debug_game(game):
+    print_game(game)
+    print_possible(game)
+    print('----------------------------------')
+
 # print the sudoku game: board, salved state, elapsed time to solve
 def print_game(game):
     print_board(game["board"])
@@ -40,7 +45,7 @@ def print_game(game):
 # print the sudoku board
 def print_board(board):
     for (i,row) in enumerate(board):
-        print("row", (i+1), ":",end="")
+        #print("row", i, ":",end="")
         for val in row:
             if val == 0:
                 print(" . ",end="")
@@ -67,8 +72,8 @@ def print_possible(game):
     for (i,row) in enumerate(possible):
         for (j, col) in enumerate(row):
             p = list(col)
-            #if board[i][j] != 0:
-            #    p = [ board[i][j] ]
+            if board[i][j] != 0:
+                p = [ board[i][j] ]
             for k in p:
                 expanded[i*3 + int((k-1)/3)][j*3 + ((k-1)%3)] = str(k)
     for (i,row) in enumerate(expanded):
@@ -97,6 +102,7 @@ def make_moves(game, moves):
         game["board"][x][y] = val
         update_possible_board(game,x,y,val,False)
     if game["filled"] == 81:
+        print('Solved It!')
         game["solved"] = True
 
 def backtrack(game, moves):
@@ -158,19 +164,29 @@ def update_possible_board(game,row,col,val,is_backtrack):
             possible[r][col].add(val)
         else:
             possible[r][col].discard(val)
-        constrained[r][col] = len(possible[r][col])
+        # XXX only if board is not set
+        if board[r][col] == 0:
+            constrained[r][col] = len(possible[r][col])
+        else:
+            constrained[r][col] = 0
     for c in [x for x in range(9) if x != col]:
         if is_backtrack:
             possible[row][c].add(val)
         else:
             possible[row][c].discard(val)
-        constrained[row][c] = len(possible[row][c])
+        if board[row][c] == 0:
+            constrained[row][c] = len(possible[row][c])
+        else:
+            constrained[row][c] = 0
     for r,c in [(r,c) for (r,c) in quadrant_coordinates(row,col) if r != row and c != col]:
         if is_backtrack:
             possible[r][c].add(val)
         else:
             possible[r][c].discard(val)
-        constrained[r][c] = len(possible[r][c])
+        if board[r][c] == 0:
+            constrained[r][c] = len(possible[r][c])
+        else:
+            constrained[r][c] = 0
     # game["possible"] = possible
     # game["constrained"] = constrained
 
@@ -206,6 +222,7 @@ def most_constrained_move(game):
         for col in range(9):
             if constrained[row][col] == 0 and game["board"][row][col] == 0:
                 # dead end, we have a coordinate with no valid values
+                print("DEAD END. Backtracking")
                 return [ [9,9], set() ]
             #if constrained[row][col] != 0 and constrained[row][col] < min:
             if constrained[row][col] != 0 and constrained[row][col] < min and game["board"][row][col] == 0:
@@ -221,16 +238,20 @@ def solve(game):
     if game["solved"] == True:
         return
     [coords, possible_values] = most_constrained_move(game)
+    print('Next Moves:',coords,'possible values:',possible_values)
     for val in list(possible_values):
+        print('making move:',coords,'val:',val)
         make_moves(game,[[coords[0], coords[1], val]])
         game["tries"] += 1
+        debug_game(game)
         solve(game)
         if (game["solved"] == True):
             break
         backtrack(game,[[coords[0], coords[1], val]])
+        print('backtracking:',coords,'val:',val)
+        debug_game(game)
     if game["solved"] == True and "end_time" not in game:
         game["end_time"] = time.time()
-    return game["board"]
 
 # Set board directly from puzzle string, bypass make_moves()
 def set_puzzle(game,puzzle_string):
@@ -267,7 +288,8 @@ def test():
     game = new_game()
     # .......12....35......6...7.7.....3.....4..8..1...........12.....8.....4..5....6..
     make_moves(game,[[0,7,1],[0,8,2],[1,4,3],[1,5,5],[2,3,6],[2,7,7],[3,0,7],[3,6,3],[4,3,4],[4,6,8],[5,0,1],[6,3,1],[6,4,2],[7,1,8],[7,7,4],[8,1,5],[8,6,6]])
-    solution = solve(game)
+    solve(game)
+    solution = game["board"]
 
     # solution for reference
     if solution != [[6, 7, 3, 8, 9, 4, 5, 1, 2], 
