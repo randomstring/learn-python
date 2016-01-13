@@ -133,9 +133,13 @@ def most_constrained(board):
 
 # check if puzzle is solvable
 def is_solvable(game):
-    # XXX - todo
-    # need to look for duplicates in row/col/quadrant
-    # similar to possible_values, but need to find duplicates
+    # Thought about this. Have to try to solve and see if we can. Need to add
+    # check to see if we failed or not.
+    pass
+
+def is_valid_solution(game):
+    # TODO
+    # double check to see if this is a valid solution
     pass
 
 # Given a game board and a row, col determine all the legal values
