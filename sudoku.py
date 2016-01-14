@@ -164,51 +164,12 @@ def possible_values(board,row,col):
         return set([board[row][col]])
     return set([board[r][c] for (r,c) in coord_constraints[row][col] if board[r][c] !=0]) ^ set([1,2,3,4,5,6,7,8,9])
 
-def possible_values_old(board,row,col):
-    if (board[row][col] != 0):
-        return set([board[row][col]])
-    used_row = set([board[row][i] for i in range(9) if board[row][i] != 0])
-    used_col = set([board[i][col] for i in range(9) if board[i][col] != 0])
-    used_quad = set([board[r][c] for r,c in quadrant_coordinates(row,col) if board[r][c] != 0])
-    used = used_row | used_col | used_quad
-    values = set( i for i in range(1,10) if i not in used )
-    return values
-
 # update the possible move board given a move, or move backtrack
 def update_possible_board(game,row,col,val,is_backtrack):
     board = game["board"]
     possible = game["possible"]
     constrained = game["constrained"]
     for (r,c) in coord_constraints[row][col]:
-        if is_backtrack:
-            possible[r][c] = possible_values(board,r,c)
-        else:
-            possible[r][c].discard(val)
-        if board[r][c] == 0:
-            constrained[r][c] = len(possible[r][c])
-        else:
-            constrained[r][c] = 0
-    return
-    # old dead code below
-    for r in range(9):
-        if is_backtrack:
-            possible[r][col] = possible_values(board,r,col)
-        else:
-            possible[r][col].discard(val)
-        if board[r][col] == 0:
-            constrained[r][col] = len(possible[r][col])
-        else:
-            constrained[r][col] = 0
-    for c in [x for x in range(9) if x != col]:
-        if is_backtrack:
-            possible[row][c] = possible_values(board,row,c)
-        else:
-            possible[row][c].discard(val)
-        if board[row][c] == 0:
-            constrained[row][c] = len(possible[row][c])
-        else:
-            constrained[row][c] = 0
-    for r,c in [(r,c) for (r,c) in quadrant_coordinates(row,col) if r != row and c != col]:
         if is_backtrack:
             possible[r][c] = possible_values(board,r,c)
         else:
