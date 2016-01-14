@@ -142,12 +142,29 @@ def is_valid_solution(game):
     # double check to see if this is a valid solution
     pass
 
+# return the list of coordinates for the quadrant that the given row,
+# col square is located.
+def quadrant_coordinates(row,col):
+    # input: row, col
+    # output: list of [row, col] in the quadrant
+    return [ [r + 3 * int(row / 3), c + 3 * int(col / 3)] for r in range(3) for c in range(3)]
+
+# pre compute the list of coordinates that share the sudoku 
+# constraints.
+def gen_coord_constraints():
+    return [[set([(row,c) for c in range(9)]) | set([(r,col) for r in range(9)]) | set([(r,c) for r,c in quadrant_coordinates(row,col)]) for col in range(9)] for row in range(9)]
+
+coord_constraints = gen_coord_constraints()
+
 # Given a game board and a row, col determine all the legal values
 # that can fill in that square. Used to create a list of values to try
 # for that square.
 def possible_values(board,row,col):
-    if row >= 9 or col >= 9:
-        return set()
+    if (board[row][col] != 0):
+        return set([board[row][col]])
+    return set([board[r][c] for (r,c) in coord_constraints[row][col] if board[r][c] !=0]) ^ set([1,2,3,4,5,6,7,8,9])
+
+def possible_values_old(board,row,col):
     if (board[row][col] != 0):
         return set([board[row][col]])
     used_row = set([board[row][i] for i in range(9) if board[row][i] != 0])
@@ -162,6 +179,17 @@ def update_possible_board(game,row,col,val,is_backtrack):
     board = game["board"]
     possible = game["possible"]
     constrained = game["constrained"]
+    for (r,c) in coord_constraints[row][col]:
+        if is_backtrack:
+            possible[r][c] = possible_values(board,r,c)
+        else:
+            possible[r][c].discard(val)
+        if board[r][c] == 0:
+            constrained[r][c] = len(possible[r][c])
+        else:
+            constrained[r][c] = 0
+    return
+    # old dead code below
     for r in range(9):
         if is_backtrack:
             possible[r][col] = possible_values(board,r,col)
@@ -189,8 +217,6 @@ def update_possible_board(game,row,col,val,is_backtrack):
             constrained[r][c] = len(possible[r][c])
         else:
             constrained[r][c] = 0
-    # game["possible"] = possible
-    # game["constrained"] = constrained
 
 def new_possible_board(game):
     return [ [ set(range(1,10)) for col in range(9)] for row in range(9)]
@@ -206,13 +232,6 @@ def gen_constrained(game):
 
 def possible_values_fast(game,row,col):
     return game["possible"][row][col]
-
-# return the list of coordinates for the quadrant that the given row,
-# col square is located.
-def quadrant_coordinates(row,col):
-    # input: row, col
-    # output: list of [row, col] in the quadrant
-    return [ [r + 3 * int(row / 3), c + 3 * int(col / 3)] for r in range(3) for c in range(3)]
 
 def most_constrained_move(game):
     # for a given game state return [row, col, (set of possible
