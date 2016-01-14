@@ -164,7 +164,11 @@ def possible_values(board,row,col):
         return set([board[row][col]])
     return set([board[r][c] for (r,c) in coord_constraints[row][col] if board[r][c] !=0]) ^ set([1,2,3,4,5,6,7,8,9])
 
-# update the possible move board given a move, or move backtrack
+# Update the possible move board given a move, or move backtrack
+# 1. despite optimizations this is a slow function because it is O(21^2) to 
+#    check all the updated coordinates and all the dependant coordinates.
+# 2. Might be faster to simply make a copy of these data scructures to make
+#    backtracking faster. This is what Norvig does in his sudoku solver.
 def update_possible_board(game,row,col,val,is_backtrack):
     board = game["board"]
     possible = game["possible"]
@@ -204,7 +208,6 @@ def most_constrained_move(game):
         for col in range(9):
             if constrained[row][col] == 0 and game["board"][row][col] == 0:
                 # dead end, we have a coordinate with no valid values
-                # print("DEAD END. Backtracking")
                 return [ [9,9], set() ]
             #if constrained[row][col] != 0 and constrained[row][col] < min:
             if constrained[row][col] != 0 and constrained[row][col] < min and game["board"][row][col] == 0:
