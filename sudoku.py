@@ -15,9 +15,6 @@ def new_game(puzzle=None):
     game["constrained"] = new_constrained_board(game)
     if puzzle:
         make_moves(game,move_list_from_strings([puzzle]))
-    # print_game(game)
-    # print_possible(game)
-    # print_board(game["constrained"])
     return game
 
 # return elapsed time for solving puzzle
@@ -38,7 +35,7 @@ def print_game(game):
     print_board(game["board"])
     if (game["solved"] == True):
         elapsed = game["end_time"] - game["start_time"]
-        print("Solved! in", game["tries"], "tries and", elapsed, "seconds")
+        print('Solved! in {0} tries and {1:.3f} seconds'.format(game["tries"],elapsed))
     else:
         print("filled in so far:", game["filled"])
 
