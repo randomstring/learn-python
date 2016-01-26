@@ -62,6 +62,7 @@ def board_string(board):
 def puzzle_string(game):
     return board_string(game["board"])
 
+# generate a grid that lists all possible values for each coordinate
 def print_possible(game):
     board = game["board"]
     possible = game["possible"]
