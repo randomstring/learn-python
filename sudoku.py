@@ -30,7 +30,7 @@ def debug_game(game):
     print_possible(game)
     print('----------------------------------')
 
-# print the sudoku game: board, salved state, elapsed time to solve
+# print the sudoku game: board, splved state, elapsed time to solve
 def print_game(game):
     print_board(game["board"])
     if (game["solved"] == True):
