@@ -294,7 +294,6 @@ def test():
         ]
 
     for (p,s) in zip(puzzles,solutions):
-        test += 1
         game = new_game(p)
         solution = solve(game)
         if puzzle_string(game) == s:
@@ -302,6 +301,7 @@ def test():
         else:
             print("FAILED: test",test)
             passed = False
+        test += 1
 
     return passed
 
