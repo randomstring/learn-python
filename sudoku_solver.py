@@ -21,11 +21,12 @@ group.add_argument('-f', metavar='filename',
                    help='filename containing puzzle string(s)')
 parser.add_argument('-b','--benchmark', action='store_true', help='time total amount of time for all puzzles')
 parser.add_argument('-t','--test', action='store_true', help='run regression tests')
+parser.add_argument('-c','--deepcopy', action='store_true', help='use deep copy for backtracking')
 parser.add_argument('-v','--verbose', action='store_true', help='more verbose output')
 args = parser.parse_args()
 
 if args.test:
-    sudoku.test()
+    sudoku.test(args.deepcopy)
     quit()
 
 start_time = time.time()
@@ -55,6 +56,9 @@ for puzzle in puzzles:
     if args.verbose:
         print(puzzle)
     game = sudoku.new_game(puzzle)
+    if args.deepcopy:
+        print("using deepcopy")
+        sudoku.deepcopy(game,True)
     sudoku.solve(game)
     if args.benchmark:
         print(sudoku.puzzle_string(game),"{:7.3f}".format(sudoku.elapsed(game)))

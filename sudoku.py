@@ -3,19 +3,24 @@
 # Sudoku Solver
 #
 import time
+import copy
 
 # create new game board
 def empty_board(size): return [ [ 0 for i in range(size)] for i in range(size)]
 
 # create new game data structure
 def new_game(puzzle=None):
-    game = {"filled": 0, "board": empty_board(9), "solved": False, "tries": 0 }
+    game = {"filled": 0, "board": empty_board(9), "solved": False, "tries": 0, "deepcopy": False}
     # init possible and constrained
     game["possible"] = new_possible_board(game)
     game["constrained"] = new_constrained_board(game)
     if puzzle:
         make_moves(game,move_list_from_strings([puzzle]))
     return game
+
+def deepcopy(game,b):
+    # set deepcopy to True/False
+    game["deepcopy"] = b
 
 # return elapsed time for solving puzzle
 def elapsed(game):
@@ -113,6 +118,21 @@ def backtrack(game, moves):
             print("backtracking on an empty coordinate:", x, y)
         game["board"][x][y] = 0
         update_possible_board(game,x,y,val,True)
+    if game["filled"] < 0:
+        print("oh no, we have negative moves")
+
+def backtrack_deepcopy(game, move, possible, constrained):
+    # undo a SINGLE move
+    # move of the form [ x, y, value ]
+    [x, y, val] = move
+    if game["board"][x][y] != 0:
+        game["filled"] -= 1
+    else:
+        print("backtracking on an empty coordinate:", x, y)
+    game["board"][x][y] = 0
+    # instead of calculating these, just use a copy
+    game["possible"] = possible
+    game["constrained"] = constrained
     if game["filled"] < 0:
         print("oh no, we have negative moves")
 
@@ -222,6 +242,9 @@ def solve(game):
         return
     [coords, possible_values] = most_constrained_move(game)
     # print('Next Moves:',coords,'possible values:',possible_values)
+    if game["deepcopy"]:
+        backtrack_possible = copy.deepcopy(game["possible"])
+        backtrack_constrained = copy.deepcopy(game["constrained"])
     for val in list(possible_values):
         # print('making move:',coords,'val:',val)
         make_moves(game,[[coords[0], coords[1], val]])
@@ -230,7 +253,10 @@ def solve(game):
         solve(game)
         if (game["solved"] == True):
             break
-        backtrack(game,[[coords[0], coords[1], val]])
+        if game["deepcopy"]:
+            backtrack_deepcopy(game,[coords[0], coords[1], val],backtrack_possible, backtrack_constrained)
+        else:
+            backtrack(game,[[coords[0], coords[1], val]])
         # print('backtracking:',coords,'val:',val)
         # debug_game(game)
     if game["solved"] == True and "end_time" not in game:
@@ -262,7 +288,7 @@ def move_list_from_strings(lines):
                     moves.append([row,col,int(val)])
     return moves
 
-def test():
+def test(use_deepcopy):
     passed = True
     test = 1
     puzzles = [
@@ -274,27 +300,27 @@ def test():
         '..53..1.493.5..2.......6.5..5..28..1.94...82.8..61..7..6.1.......2..5.185.9..26..',
         # hard problem from American Airlines inflight Magazine
         '37.4..1.........2....2.1.53.....96144...2...77693.....92.1.6....1.........8..2.91',
-        # Norvig's hardest sudoku problem http://norvig.com/sudoku.html  (takes 0.09 s)
-        #'.....6....59.....82....8....45........3........6..3.54...325..6..................', #orig
-        '.....6....59.....82....8....45........3........6..3.54...325..6..............1283', # make it easier
         # from top95.txt
         '4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......',
         '52...6.........7.13...........4..8..6......5...........418.........3..2...87.....',
         '6.....8.3.4.7.................5.4.7.3..2.....1.6.......2.....5.....8.6......1....',
+        '....14....3....2...7..........9...3.6.1.............8.2.....1.4....5.6.....7.8...',
         ]
     solutions = [
         '673894512912735486845612973798261354526473891134589267469128735287356149351947628',
         '547162893863759142921843576156237984279584361384691725495376218732418659618925437',
         '285397164936541287471286359657428931194753826823619475768134592342965718519872643',
         '372458169156937428894261753235789614481625937769314582923146875517893246648572391',
-        '834296715659174328271538469945862137183457692726913854418325976362789541597641283',
         '417369825632158947958724316825437169791586432346912758289643571573291684164875293',
         '527316489896542731314987562172453896689271354453698217941825673765134928238769145',
         '617459823248736915539128467982564371374291586156873294823647159791385642465912738',
+        '962314857134587269578296413847962531651873942329145786285639174793451628416728395',
         ]
 
     for (p,s) in zip(puzzles,solutions):
         game = new_game(p)
+        if use_deepcopy:
+            deepcopy(game,True)
         solution = solve(game)
         if puzzle_string(game) == s:
             print("PASSED: test",test)
