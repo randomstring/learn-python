@@ -10,7 +10,7 @@ parser = argparse.ArgumentParser(description='Solve a Sudoku puzzle.',
                                  formatter_class=argparse.RawDescriptionHelpFormatter,
                                  epilog= '''
 Example puzzle format:
-.....6....59.....82....8....45........3........6..3.54...325..6..................
+...............9..97.3......1..6.5....47.8..2.....2..6.31..4......8..167.87......
 '''
 )
 
