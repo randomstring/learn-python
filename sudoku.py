@@ -46,13 +46,13 @@ def print_game(game):
 
 # print the sudoku board
 def print_board(board):
-    for (i,row) in enumerate(board):
-        #print("row", i, ":",end="")
+    for (i, row) in enumerate(board):
+        # print("row", i, ":", end="")
         for val in row:
             if val == 0:
-                print(" . ",end="")
+                print(" . ", end="")
             else:
-                print(" ",val," ",end="",sep="")
+                print(" ", val, " ", end="", sep="")
         print("")
 
 # return the current puzzle state as a string
