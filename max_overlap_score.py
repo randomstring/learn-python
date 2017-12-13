@@ -39,12 +39,13 @@ def cost(job_list):
     return cost
 
 
-def jobs_after(time,job_list):
+def jobs_after(time, job_list):
     """
     input: a time and a job list
     output: return all the jobs that start after the given time
     """
     return [job for job in job_list if (job[0] > time)]
+
 
 def find_best_jobs(job_list):
     """
