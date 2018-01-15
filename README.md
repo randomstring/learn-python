@@ -92,4 +92,6 @@ Play a game of connect four. Use alpha-beta pruning to pick computer's move.
 
 ## Misc. Programming Practice
 
-Dynamic programming, implementing qsort, etc.
+ * `max_overlap_score.py` - Dynamic Programming: Given a set of n jobs with [start time, end time, cost] find a subset so that no 2 jobs overlap and the cost is maximized.
+ * `qsort.py` - implement quick sort for practice
+ * `houghlines.py` - playing around with houghlines using OpenCV libraries
