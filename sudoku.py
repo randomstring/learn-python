@@ -73,11 +73,14 @@ def puzzle_entry(x):
         return '.'
     return str(x)
 
+
 def board_string(board):
     return ''.join([''.join([puzzle_entry(x) for x in row]) for row in board])
 
+
 def puzzle_string(game):
     return board_string(game["board"])
+
 
 # generate a grid that lists all possible values for each coordinate
 def print_possible(game):
@@ -134,6 +137,7 @@ def backtrack(game, moves):
         update_possible_board(game,x,y,val,True)
     if game["filled"] < 0:
         print("oh no, we have negative moves")
+
 
 def backtrack_deepcopy(game, move, possible, constrained):
     # undo a SINGLE move
@@ -201,7 +205,7 @@ def possible_values(board,row,col):
 #    check all the updated coordinates and all the dependant coordinates.
 # 2. Might be faster to simply make a copy of these data scructures to make
 #    backtracking faster. This is what Norvig does in his sudoku solver.
-def update_possible_board(game,row,col,val,is_backtrack):
+def update_possible_board(game, row, col, val, is_backtrack):
     board = game["board"]
     possible = game["possible"]
     constrained = game["constrained"]
@@ -235,24 +239,28 @@ def most_constrained_move(game):
     # values)] for the most constrained possition of the game
     constrained = game["constrained"]
     min = 10
-    coords = [9,9]
+    coords = [9, 9]
     for row in range(9):
         for col in range(9):
             if constrained[row][col] == 0 and game["board"][row][col] == 0:
                 # dead end, we have a coordinate with no valid values
                 return [ [9,9], set() ]
             #if constrained[row][col] != 0 and constrained[row][col] < min:
-            if constrained[row][col] != 0 and constrained[row][col] < min and game["board"][row][col] == 0:
+            if (constrained[row][col] != 0 and
+                constrained[row][col] < min and
+                game["board"][row][col] == 0):
                 min = constrained[row][col]
                 coords = [row, col]
-    return [ coords, game["possible"][coords[0]][coords[1]] ]
+            # IDEA: could keep a list of the most constrained coords, return
+            # the coord wich has the most constrained peers!
+    return [coords, game["possible"][coords[0]][coords[1]]]
 
 def solve(game):
     # 1. pick most constrained coordinate and try all legal values
     # 2. recersively solve the rest of the puzzle
     if "start_time" not in game:
         game["start_time"] = time.time()
-    if game["solved"] == True:
+    if game["solved"] is True:
         return
     [coords, possible_values] = most_constrained_move(game)
     # print('Next Moves:',coords,'possible values:',possible_values)
@@ -261,29 +269,32 @@ def solve(game):
         backtrack_constrained = copy.deepcopy(game["constrained"])
     for val in list(possible_values):
         # print('making move:',coords,'val:',val)
-        make_moves(game,[[coords[0], coords[1], val]])
+        make_moves(game, [[coords[0], coords[1], val]])
         game["tries"] += 1
         # debug_game(game)
         solve(game)
-        if (game["solved"] == True):
+        if (game["solved"] is True):
             break
         if game["deepcopy"]:
-            backtrack_deepcopy(game,[coords[0], coords[1], val],backtrack_possible, backtrack_constrained)
+            backtrack_deepcopy(game, [coords[0], coords[1], val],
+                               backtrack_possible, backtrack_constrained)
         else:
-            backtrack(game,[[coords[0], coords[1], val]])
+            backtrack(game, [[coords[0], coords[1], val]])
         # print('backtracking:',coords,'val:',val)
         # debug_game(game)
-    if game["solved"] == True and "end_time" not in game:
+    if game["solved"] is True and "end_time" not in game:
         game["end_time"] = time.time()
+
 
 # Set board directly from puzzle string, bypass make_moves()
 def set_puzzle(game,puzzle_string):
-    for i,val in enumerate(puzzle_string):
+    for i, val in enumerate(puzzle_string):
         if val == '.':
             val = 0
         else:
             game["filled"] += 1
         game["board"][int(i / 9)][i % 9] = int(val)
+
 
 # Generate a list of moves given either 1) an array of row strings or
 # 2) one long string with all the filled in squares
@@ -291,16 +302,17 @@ def move_list_from_strings(lines):
     moves = []
     if len(lines) == 1:
         # format: one list of elements "...2...5...1" or "10004000700" etc.
-        for i,val in enumerate(lines[0]):
+        for i, val in enumerate(lines[0]):
             if val != '.' and val != '0':
                 moves.append([int(i / 9), i % 9, int(val)])
     else:
         # format: list of rows
-        for row,line in enumerate(lines):
+        for row, line in enumerate(lines):
             for col, val in enumerate(line.split()):
                 if val != '.' and val != '0':
-                    moves.append([row,col,int(val)])
+                    moves.append([row, col, int(val)])
     return moves
+
 
 def test(use_deepcopy):
     passed = True
@@ -331,17 +343,16 @@ def test(use_deepcopy):
         '962314857134587269578296413847962531651873942329145786285639174793451628416728395',
         ]
 
-    for (p,s) in zip(puzzles,solutions):
+    for (p, s) in zip(puzzles, solutions):
         game = new_game(p)
         if use_deepcopy:
-            deepcopy(game,True)
+            deepcopy(game, True)
         solution = solve(game)
         if puzzle_string(game) == s:
-            print("PASSED: test",test)
+            print("PASSED: test", test)
         else:
-            print("FAILED: test",test)
+            print("FAILED: test", test)
             passed = False
         test += 1
 
     return passed
-
