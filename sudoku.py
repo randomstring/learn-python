@@ -5,22 +5,30 @@
 import time
 import copy
 
+
 # create new game board
-def empty_board(size): return [ [ 0 for i in range(size)] for i in range(size)]
+def empty_board(size): return [[0 for i in range(size)] for i in range(size)]
+
 
 # create new game data structure
 def new_game(puzzle=None):
-    game = {"filled": 0, "board": empty_board(9), "solved": False, "tries": 0, "deepcopy": False}
+    game = {"filled": 0,
+            "board": empty_board(9),
+            "solved": False,
+            "tries": 0,
+            "deepcopy": False}
     # init possible and constrained
     game["possible"] = new_possible_board(game)
     game["constrained"] = new_constrained_board(game)
     if puzzle:
-        make_moves(game,move_list_from_strings([puzzle]))
+        make_moves(game, move_list_from_strings([puzzle]))
     return game
 
-def deepcopy(game,b):
+
+def deepcopy(game, b):
     # set deepcopy to True/False
     game["deepcopy"] = b
+
 
 # return elapsed time for solving puzzle
 def elapsed(game):
@@ -30,19 +38,22 @@ def elapsed(game):
         return game["end_time"] - game["start_time"]
     return time.time() - game["start_time"]
 
+
 def debug_game(game):
     print_game(game)
     print_possible(game)
     print('----------------------------------')
 
+
 # print the sudoku game: board, splved state, elapsed time to solve
 def print_game(game):
     print_board(game["board"])
-    if (game["solved"] == True):
+    if (game["solved"] is True):
         elapsed = game["end_time"] - game["start_time"]
         print('Solved! in {0} tries and {1:.3f} seconds'.format(game["tries"],elapsed))
     else:
         print("filled in so far:", game["filled"])
+
 
 # print the sudoku board
 def print_board(board):
@@ -54,6 +65,7 @@ def print_board(board):
             else:
                 print(" ", val, " ", end="", sep="")
         print("")
+
 
 # return the current puzzle state as a string
 def puzzle_entry(x):
@@ -93,6 +105,7 @@ def print_possible(game):
         row.insert(3,'|')
         print(''.join(row))
 
+
 def make_moves(game, moves):
     # make a list of moves
     # moves is a list [ x, y, value ]
@@ -106,6 +119,7 @@ def make_moves(game, moves):
         update_possible_board(game,x,y,val,False)
     if game["filled"] == 81:
         game["solved"] = True
+
 
 def backtrack(game, moves):
     # undo a list of moves
