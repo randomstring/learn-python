@@ -50,7 +50,8 @@ def print_game(game):
     print_board(game["board"])
     if (game["solved"] is True):
         elapsed = game["end_time"] - game["start_time"]
-        print('Solved! in {0} tries and {1:.3f} seconds'.format(game["tries"],elapsed))
+        print('Solved! in {0} tries and {1:.3f} seconds'.format(
+            game["tries"], elapsed))
     else:
         print("filled in so far:", game["filled"])
 
@@ -87,14 +88,14 @@ def print_possible(game):
     board = game["board"]
     possible = game["possible"]
     expanded = [[" " for c in range(27)] for r in range(27)]
-    for (i,row) in enumerate(possible):
+    for (i, row) in enumerate(possible):
         for (j, col) in enumerate(row):
             p = list(col)
             if board[i][j] != 0:
-                p = [ board[i][j] ]
+                p = [board[i][j]]
             for k in p:
-                expanded[i*3 + int((k-1)/3)][j*3 + ((k-1)%3)] = str(k)
-    for (i,row) in enumerate(expanded):
+                expanded[i*3 + int((k-1)/3)][j*3 + ((k-1) % 3)] = str(k)
+    for (i, row) in enumerate(expanded):
         if i % 3 == 0:
             print('---+---+---+---+---+---+---+---+---')
         # GAGK - fix me
@@ -117,9 +118,10 @@ def make_moves(game, moves):
         if game["board"][x][y] == 0:
             game["filled"] += 1
         else:
-            print("making a move on a coordinate that is already filled in:", x, y, val)
+            print("making a move on a coordinate that is already filled in:",
+                  x, y, val)
         game["board"][x][y] = val
-        update_possible_board(game,x,y,val,False)
+        update_possible_board(game, x, y, val, False)
     if game["filled"] == 81:
         game["solved"] = True
 
@@ -134,7 +136,7 @@ def backtrack(game, moves):
         else:
             print("backtracking on an empty coordinate:", x, y)
         game["board"][x][y] = 0
-        update_possible_board(game,x,y,val,True)
+        update_possible_board(game, x, y, val, True)
     if game["filled"] < 0:
         print("oh no, we have negative moves")
 
@@ -154,18 +156,20 @@ def backtrack_deepcopy(game, move, possible, constrained):
     if game["filled"] < 0:
         print("oh no, we have negative moves")
 
+
 # Create a board (matrix) with a count of how many possible values can
 # legally satisfy that square. We use this to pick which square to
 # fill in next.
 def most_constrained(board):
-    constrained= empty_board(9)
+    constrained = empty_board(9)
     for row in range(9):
         for col in range(9):
             if (board[row][col] != 0):
                 constrained[row][col] = 0
             else:
-                constrained[row][col] = len(possible_values(board,row,col))
+                constrained[row][col] = len(possible_values(board, row, col))
     return constrained
+
 
 # check if puzzle is solvable
 def is_solvable(game):
@@ -173,45 +177,59 @@ def is_solvable(game):
     # check to see if we failed or not.
     pass
 
+
 def is_valid_solution(game):
     # TODO
     # double check to see if this is a valid solution
     pass
 
+
 # return the list of coordinates for the quadrant that the given row,
 # col square is located.
-def quadrant_coordinates(row,col):
+def quadrant_coordinates(row, col):
     # input: row, col
     # output: list of [row, col] in the quadrant
-    return [ [r + 3 * int(row / 3), c + 3 * int(col / 3)] for r in range(3) for c in range(3)]
+    return [[r + 3 * int(row / 3), c + 3 * int(col / 3)]
+            for r in range(3)
+            for c in range(3)]
 
-# pre compute the list of coordinates that share the sudoku 
+
+# pre compute the list of coordinates that share the sudoku
 # constraints.
 def gen_coord_constraints():
-    return [[set([(row,c) for c in range(9)]) | set([(r,col) for r in range(9)]) | set([(r,c) for r,c in quadrant_coordinates(row,col)]) for col in range(9)] for row in range(9)]
+    return [[set([(row, c) for c in range(9)]) |
+             set([(r, col) for r in range(9)]) |
+             set([(r, c) for r, c in quadrant_coordinates(row, col)])
+             for col in range(9)]
+            for row in range(9)]
+
 
 coord_constraints = gen_coord_constraints()
+
 
 # Given a game board and a row, col determine all the legal values
 # that can fill in that square. Used to create a list of values to try
 # for that square.
-def possible_values(board,row,col):
+def possible_values(board, row, col):
     if (board[row][col] != 0):
         return set([board[row][col]])
-    return set([board[r][c] for (r,c) in coord_constraints[row][col] if board[r][c] !=0]) ^ set([1,2,3,4,5,6,7,8,9])
+    return set([board[r][c] for (r, c) in coord_constraints[row][col]
+                if board[r][c] != 0]) ^ set([1, 2, 3, 4, 5, 6, 7, 8, 9])
+
 
 # Update the possible move board given a move, or move backtrack
-# 1. despite optimizations this is a slow function because it is O(21^2) to 
-#    check all the updated coordinates and all the dependant coordinates.
+# 1. despite optimizations this is a slow function because it is O(21^2)
+#    to check all the updated coordinates and all the dependant coordinates.
 # 2. Might be faster to simply make a copy of these data scructures to make
 #    backtracking faster. This is what Norvig does in his sudoku solver.
+#    EDIT: copying the hashes of sets is slow. Fater to recalculate.
 def update_possible_board(game, row, col, val, is_backtrack):
     board = game["board"]
     possible = game["possible"]
     constrained = game["constrained"]
-    for (r,c) in coord_constraints[row][col]:
+    for (r, c) in coord_constraints[row][col]:
         if is_backtrack:
-            possible[r][c] = possible_values(board,r,c)
+            possible[r][c] = possible_values(board, r, c)
         else:
             possible[r][c].discard(val)
         if board[r][c] == 0:
@@ -219,20 +237,28 @@ def update_possible_board(game, row, col, val, is_backtrack):
         else:
             constrained[r][c] = 0
 
+
 def new_possible_board(game):
-    return [ [ set(range(1,10)) for col in range(9)] for row in range(9)]
+    return [[set(range(1, 10)) for col in range(9)] for row in range(9)]
+
 
 def new_constrained_board(game):
-    return [ [ 9 for col in range(9)] for row in range(9)]
+    return [[9 for col in range(9)] for row in range(9)]
+
 
 def gen_possible(game):
-    return [ [ possible_values(game["board"],row,col) for col in range(9)] for row in range(9)]
+    return [[possible_values(game["board"], row, col) for col in range(9)]
+            for row in range(9)]
+
 
 def gen_constrained(game):
-    return [ [ len(game["possible"][row][col]) for col in range(9)] for row in range(9)]
+    return [[len(game["possible"][row][col]) for col in range(9)]
+            for row in range(9)]
 
-def possible_values_fast(game,row,col):
+
+def possible_values_fast(game, row, col):
     return game["possible"][row][col]
+
 
 def most_constrained_move(game):
     # for a given game state return [row, col, (set of possible
@@ -244,16 +270,17 @@ def most_constrained_move(game):
         for col in range(9):
             if constrained[row][col] == 0 and game["board"][row][col] == 0:
                 # dead end, we have a coordinate with no valid values
-                return [ [9,9], set() ]
-            #if constrained[row][col] != 0 and constrained[row][col] < min:
-            if (constrained[row][col] != 0 and
-                constrained[row][col] < min and
-                game["board"][row][col] == 0):
+                return [[9, 9], set()]
+            # if constrained[row][col] != 0 and constrained[row][col] < min:
+            if ((constrained[row][col] != 0 and
+                 constrained[row][col] < min and
+                 game["board"][row][col] == 0)):
                 min = constrained[row][col]
                 coords = [row, col]
             # IDEA: could keep a list of the most constrained coords, return
             # the coord wich has the most constrained peers!
     return [coords, game["possible"][coords[0]][coords[1]]]
+
 
 def solve(game):
     # 1. pick most constrained coordinate and try all legal values
@@ -287,7 +314,7 @@ def solve(game):
 
 
 # Set board directly from puzzle string, bypass make_moves()
-def set_puzzle(game,puzzle_string):
+def set_puzzle(game, puzzle_string):
     for i, val in enumerate(puzzle_string):
         if val == '.':
             val = 0
