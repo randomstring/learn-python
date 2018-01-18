@@ -23,7 +23,7 @@ group.add_argument('-f', metavar='filename',
 parser.add_argument('-b', '--benchmark',
                     action='store_true',
                     help='time total amount of time for all puzzles')
-parser.add_argument('-t','--test',
+parser.add_argument('-t', '--test',
                     action='store_true',
                     help='run regression tests')
 parser.add_argument('-c', '--deepcopy',
@@ -32,6 +32,9 @@ parser.add_argument('-c', '--deepcopy',
 parser.add_argument('-v', '--verbose',
                     action='store_true',
                     help='more verbose output')
+parser.add_argument('-i', '--hint',
+                    action='store_true',
+                    help='show possible values for given puzzle')
 args = parser.parse_args()
 
 if args.test:
@@ -60,20 +63,26 @@ else:
     for puzzle in input:
         puzzles.append(puzzle.rstrip())
 
-for puzzle in puzzles:
-    count += 1
-    if args.verbose:
-        print(puzzle)
-    game = sudoku.new_game(puzzle)
-    if args.deepcopy:
-        print("using deepcopy")
-        sudoku.deepcopy(game, True)
-    sudoku.solve(game)
-    if args.benchmark:
-        print(sudoku.puzzle_string(game),
-              "{:7.3f}".format(sudoku.elapsed(game)))
-    else:
-        sudoku.print_game(game)
+if args.hint:
+    for puzzle in puzzles:
+        game = sudoku.new_game(puzzle)
+        sudoku.print_possible(game)
+else:
+    # by default we solve all the given puzzles
+    for puzzle in puzzles:
+        count += 1
+        if args.verbose:
+            print(puzzle)
+            game = sudoku.new_game(puzzle)
+            if args.deepcopy:
+                print("using deepcopy")
+                sudoku.deepcopy(game, True)
+                sudoku.solve(game)
+                if args.benchmark:
+                    print(sudoku.puzzle_string(game),
+                          "{:7.3f}".format(sudoku.elapsed(game)))
+                else:
+                    sudoku.print_game(game)
 
 elapsed = time.time() - start_time
 if args.verbose or args.benchmark:
