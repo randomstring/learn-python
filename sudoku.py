@@ -2,6 +2,7 @@
 #
 # Sudoku Solver
 #
+from __future__ import print_function
 import time
 import copy
 
@@ -383,3 +384,8 @@ def test(use_deepcopy):
         test += 1
 
     return passed
+
+
+if __name__ == '__main__':
+    test(False)
+    test(True)
