@@ -73,16 +73,16 @@ else:
         count += 1
         if args.verbose:
             print(puzzle)
-            game = sudoku.new_game(puzzle)
-            if args.deepcopy:
-                print("using deepcopy")
-                sudoku.deepcopy(game, True)
-                sudoku.solve(game)
-                if args.benchmark:
-                    print(sudoku.puzzle_string(game),
-                          "{:7.3f}".format(sudoku.elapsed(game)))
-                else:
-                    sudoku.print_game(game)
+        game = sudoku.new_game(puzzle)
+        if args.deepcopy:
+            print("using deepcopy")
+            sudoku.deepcopy(game, True)
+        sudoku.solve(game)
+        if args.benchmark:
+            print(sudoku.puzzle_string(game),
+                  "{:7.3f}".format(sudoku.elapsed(game)))
+        else:
+            sudoku.print_game(game)
 
 elapsed = time.time() - start_time
 if args.verbose or args.benchmark:
