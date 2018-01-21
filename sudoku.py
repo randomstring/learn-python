@@ -111,6 +111,10 @@ def print_possible(game):
         print(''.join(row))
 
 
+def print_constrained(game):
+    print_board(game["constrained"])
+
+
 def make_moves(game, moves):
     # make a list of moves
     # moves is a list [ x, y, value ]
@@ -179,10 +183,22 @@ def is_solvable(game):
     pass
 
 
-def is_valid_solution(game):
+def is_valid_solution(puzzle_string):
     # TODO
     # double check to see if this is a valid solution
-    pass
+    board, filled = array_from_puzzle_string(puzzle_string)
+    if filled != 81:
+        return False
+    for row in range(9):
+        for col in range(9):
+            v = board[row][col]
+            board[row][col] = 0
+            if (not all([board[r][c] != v
+                        for (r, c) in coord_constraints[row][col]
+                        if r != row and c != col])):
+                return False
+            board[row][col] = v
+    return True
 
 
 # return the list of coordinates for the quadrant that the given row,
@@ -267,20 +283,61 @@ def most_constrained_move(game):
     constrained = game["constrained"]
     min = 10
     coords = [9, 9]
+    coord_list = []
     for row in range(9):
         for col in range(9):
             if constrained[row][col] == 0 and game["board"][row][col] == 0:
                 # dead end, we have a coordinate with no valid values
                 return [[9, 9], set()]
-            # if constrained[row][col] != 0 and constrained[row][col] < min:
             if ((constrained[row][col] != 0 and
                  constrained[row][col] < min and
                  game["board"][row][col] == 0)):
                 min = constrained[row][col]
                 coords = [row, col]
+                coord_list = [coords]
+            elif ((constrained[row][col] != 0 and
+                   constrained[row][col] == min and
+                   game["board"][row][col] == 0)):
+                coord_list.append([row, col])
             # IDEA: could keep a list of the most constrained coords, return
             # the coord wich has the most constrained peers!
+    if min == 1:
+        print("Forced: ", coord_list, game["possible"][coords[0]][coords[1]])
     return [coords, game["possible"][coords[0]][coords[1]]]
+
+
+def most_constrained_moves(game):
+    # For a given game state return list of [row, col, (set of possible
+    # values)] for the most constrained possitions of the game
+    constrained = game["constrained"]
+    min = 10
+    coords = [9, 9]
+    coord_list = []
+    for row in range(9):
+        for col in range(9):
+            if constrained[row][col] == 0 and game["board"][row][col] == 0:
+                # dead end, we have a coordinate with no valid values
+                return [[[9, 9], set()]]
+            if ((constrained[row][col] != 0 and
+                 constrained[row][col] < min and
+                 game["board"][row][col] == 0)):
+                min = constrained[row][col]
+                coords = [row, col]
+                coord_list = [coords]
+            elif ((constrained[row][col] != 0 and
+                   constrained[row][col] == min and
+                   game["board"][row][col] == 0)):
+                coord_list.append([row, col])
+            # IDEA: could keep a list of the most constrained coords, return
+            # the coord wich has the most constrained peers!
+    if min == 1:
+        # return all the "forced" one possible option moves
+        # print("Forced: ", coord_list, game["possible"][coords[0]][coords[1]])
+        return [[coord, game["possible"][coord[0]][coord[1]]]
+                for coord in coord_list]
+    else:
+        # only return one coord
+        return [[coords, game["possible"][coords[0]][coords[1]]]]
 
 
 def solve(game):
@@ -290,38 +347,63 @@ def solve(game):
         game["start_time"] = time.time()
     if game["solved"] is True:
         return
-    [coords, possible_values] = most_constrained_move(game)
-    # print('Next Moves:',coords,'possible values:',possible_values)
     if game["deepcopy"]:
         backtrack_possible = copy.deepcopy(game["possible"])
         backtrack_constrained = copy.deepcopy(game["constrained"])
-    for val in list(possible_values):
-        # print('making move:',coords,'val:',val)
-        make_moves(game, [[coords[0], coords[1], val]])
-        game["tries"] += 1
-        # debug_game(game)
+    # [coords, possible_values] = most_constrained_move(game)
+    mcm = most_constrained_moves(game)
+    if len(mcm) > 1:
+        # we have a list of next moves, make them all then try solving
+        m = [[c[0], c[1], list(pv)] for [c, pv] in mcm]
+        moves = [[c0, c1, p[0]] for [c0, c1, p] in m]
+        # print(moves)
+        make_moves(game, moves)
         solve(game)
-        if (game["solved"] is True):
-            break
-        if game["deepcopy"]:
-            backtrack_deepcopy(game, [coords[0], coords[1], val],
-                               backtrack_possible, backtrack_constrained)
-        else:
-            backtrack(game, [[coords[0], coords[1], val]])
-        # print('backtracking:',coords,'val:',val)
-        # debug_game(game)
+        if (game["solved"] is False):
+            for [c0, c1, val] in reversed(moves):
+                # print('backtracking:', c0, c1, ' val:', val)
+                if game["deepcopy"]:
+                    backtrack_deepcopy(game, [c0, c1, val],
+                                       backtrack_possible,
+                                       backtrack_constrained)
+                else:
+                    backtrack(game, [[c0, c1, val]])
+    else:
+        [coords, possible_values] = mcm[0]
+        for val in list(possible_values):
+            # print('making move:',coords,'val:',val)
+            make_moves(game, [[coords[0], coords[1], val]])
+            game["tries"] += 1
+            # debug_game(game)
+            solve(game)
+            if (game["solved"] is True):
+                break
+            if game["deepcopy"]:
+                backtrack_deepcopy(game, [coords[0], coords[1], val],
+                                   backtrack_possible, backtrack_constrained)
+            else:
+                backtrack(game, [[coords[0], coords[1], val]])
+            # print('backtracking:',coords,'val:',val)
+            # debug_game(game)
     if game["solved"] is True and "end_time" not in game:
         game["end_time"] = time.time()
 
 
 # Set board directly from puzzle string, bypass make_moves()
 def set_puzzle(game, puzzle_string):
+    game["board"], game["filled"] = array_from_puzzle_string(puzzle_string)
+
+
+def array_from_puzzle_string(puzzle_string):
+    filled = 0
+    board = [[0 for x in range(9)] for x in range(9)]
     for i, val in enumerate(puzzle_string):
         if val == '.':
             val = 0
         else:
-            game["filled"] += 1
-        game["board"][int(i / 9)][i % 9] = int(val)
+            filled += 1
+        board[int(i / 9)][i % 9] = int(val)
+    return board, filled
 
 
 # Generate a list of moves given either 1) an array of row strings or
@@ -347,7 +429,7 @@ def test(use_deepcopy):
     test = 1
     puzzles = [
         # From The Algorithm Design Manual 2nd Edition (S. S. Skiena) Page 239
-        '.......12....35......6...7.7.....3.....4..8..1...........12.....8.....4..5....6..',
+        '67..9..129...35......6...7.79....3.....4..8..1...........12.....8.....4..5....6.8',
         # Easy problem from American Airlines inflight Magazine
         '..7.6....8.3...14292.8..5...5.2..9.42..584..13.4..1.2...5..6.18732...6.9....2.4..',
         # medium problem from American Airlines inflight Magazine
@@ -375,12 +457,34 @@ def test(use_deepcopy):
         game = new_game(p)
         if use_deepcopy:
             deepcopy(game, True)
-        solution = solve(game)
-        if puzzle_string(game) == s:
-            print("PASSED: test", test)
-        else:
-            print("FAILED: test", test)
+        solve(game)
+
+        diff = zip([a for a in p], [b for b in puzzle_string(game)])
+        diff = ''.join(["." if a == b or a == '.' else 'X' for [a, b] in diff])
+        if diff != ''.join('.' * 81):
+            print("Solution changed some of the initial values.")
+            print("puzzle  =", p)
+            print("got     =", puzzle_string(game))
+            print("diff    =", diff)
             passed = False
+
+        if puzzle_string(game) != s:
+            print("Answer did not match the expected solution")
+            print("expected=", s)
+            print("got     =", puzzle_string(game))
+            diff = zip([a for a in s], [b for b in puzzle_string(game)])
+            print("diff    =", ''.join(["." if a == b else 'X' for [a, b] in diff]))
+
+        if is_valid_solution(puzzle_string(game)):
+            print('PASSED: test {0}  in {1:.3f} seconds {2}'.format(
+                test, game["end_time"] - game["start_time"],
+                " using deepcopy" if use_deepcopy else "",
+            ))
+        else:
+            print("FAILED: test ", test)
+            print("got     =", puzzle_string(game))
+            passed = False
+
         test += 1
 
     return passed
