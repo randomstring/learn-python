@@ -4,7 +4,7 @@
 import math
 
 
-# naive brute force
+# naive brute force O(n^4)
 def naive(n=1000):
     for a in range(1, n + 1):
         for b in range(1, n + 1):
@@ -18,6 +18,7 @@ def naive(n=1000):
 #  1. pre-compute and cache a**3, b**3,
 #  2. directly compute d from a,b,c
 #  3. only check values of c for which a**3 + b**3 - c**3 > 0
+# O(n^3)
 def better(n=1000):
     e = 1/3
     for a in range(1, n + 1):
@@ -39,6 +40,7 @@ def better(n=1000):
 # (b,a,c,d) is also a solution.  Likewise any soltion of the from
 # (a,b,c,d) -> (a,b,d,c) is also a slotion.  by breaking from our
 # loops whenever b > a and c > d, less work is duplicated.
+# O(n^3)
 def better_symmetry(n=1000):
     e = 1/3
     for a in range(1, n + 1):
@@ -69,11 +71,11 @@ def better_symmetry(n=1000):
                             print(b, a, d, c)
 
 
-# Cracking the Coding Interview book points out that if we just comput
-# all the a^3 + b^ combinations and note all the pairs that add up to
-# the same value, we now have a list of all possible pairs. Then we
-# iterate over all the values and print out the permutations of the
-# pairs.
+# Cracking the Coding Interview book points out that we can just
+# compute all the a^3 + b^3 combinations and note the pairs that add
+# up to the same sum. We now have a list of all possible pairs. Then
+# we iterate over all the values and print out the permutations of the
+# pairs.  O(n^2)
 def book(n=1000):
     sums = {}
     for a in range(1, n + 1):
@@ -89,7 +91,7 @@ def book(n=1000):
                 print(a, b, c, d)
 
 
-# use suggested book method but also use symmetry.
+# Use suggested book lookup method but also use symmetry. Still O(n^2)
 def book_sym(n=1000):
     sums = {}
     for a in range(1, n + 1):
