@@ -7,6 +7,8 @@
 # the next person (i.e. No. 2) and gives the sword to the next living person (i.e. No. 3). All
 # people do the same until only 1 participant survives. Which number survives to the end?
 #
+# https://cr4.globalspec.com/blogentry/29406/Hornswoggling-Swordsman-Newsletter-Challenge-May-2019
+
 p = [i for i in range(1, 101)]
 # mod is 0 or 1 and signifies if we kill starting with the second or first element respectively
 mod = len(p) % 2
